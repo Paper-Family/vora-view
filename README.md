@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🖥️ VORA View Layer
 
-## Getting Started
+The VORA View layer is built with Next.js (App Router) and TypeScript,
+designed for a modular, maintainable, and scalable user interface.
+It follows a route-driven layout structure where each segment of the app
+(dashboard, sectors, login, etc.) has its own layout.tsx and page.tsx,
+providing clear separation of concerns and flexibility for future expansion.
+
+---
+
+🚀 Getting Started
 
 First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+    npm run dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000 in your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🎨 Design Philosophy
 
-## Learn More
+• Atomic & Modular
+Each UI component is self-contained and reusable across different routes.
 
-To learn more about Next.js, take a look at the following resources:
+• Route-Based Layout Hierarchy
+Next.js App Router allows each route segment to have its own layout.tsx and page.tsx,
+enabling independent structure and metadata.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+• Shared Layout Components
+Common structures (navigation, headers, analytics panels) are stored in src/layouts
+and imported into specific route layouts for consistency and maintainability.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+• Responsive & Accessible
+The entire UI is built with Tailwind CSS and optimized for accessibility
+(ARIA roles, semantic HTML).
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+📱 Views Overview
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Dashboard - Displays summarized data of all sectors, recent analyses, and system activity.
+Sectors - Lists available industry sectors (EV, Bio, Semiconductor, etc.)
+with filters and quick analysis results.
+Sector Detail - Dynamic route showing article-based AI analysis,
+sentiment summary, and scenario projection.
+Login / Auth - Public-facing pages for user authentication and onboarding.
+Settings - User preferences, API key management, and platform configurations.
+
+---
