@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SelectionStep } from "@/components/SelectionStep";
 import { ArticlesStep } from "@/components/ArticleStep";
-// import { SummaryStep } from './components/SummaryStep';
+import { SummaryStep } from "@/components/SummaryStep";
 import { Article, getArticlesByCategory } from "@/mock/data";
 
 type Step = "selection" | "articles" | "summary";
@@ -156,9 +156,9 @@ export default function HomePage() {
           />
         )}
 
-        {/* {currentStep === "summary" && (
+        {currentStep === "summary" && (
           <SummaryStep savedArticles={savedArticles} onBack={handleBack} />
-        )} */}
+        )}
 
         {/* Reset Button (for demo purposes) */}
         {currentStep !== "selection" && (
