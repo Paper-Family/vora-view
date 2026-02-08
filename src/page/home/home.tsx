@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-// import { SelectionStep } from './components/SelectionStep';
+import { SelectionStep } from "@/components/SelectionStep";
 import { ArticlesStep } from "@/components/ArticleStep";
 // import { SummaryStep } from './components/SummaryStep';
 import { Article, getArticlesByCategory } from "@/mock/data";
@@ -135,7 +135,7 @@ export default function HomePage() {
         </div>
 
         {/* Content */}
-        {/* {currentStep === 'selection' && (
+        {currentStep === "selection" && (
           <SelectionStep
             selectedDate={selectedDate}
             selectedCategory={selectedCategory}
@@ -143,7 +143,7 @@ export default function HomePage() {
             onCategoryChange={setSelectedCategory}
             onSubmit={handleSubmitSelection}
           />
-        )} */}
+        )}
 
         {currentStep === "articles" && (
           <ArticlesStep
@@ -156,11 +156,8 @@ export default function HomePage() {
           />
         )}
 
-        {/* {currentStep === 'summary' && (
-          <SummaryStep
-            savedArticles={savedArticles}
-            onBack={handleBack}
-          />
+        {/* {currentStep === "summary" && (
+          <SummaryStep savedArticles={savedArticles} onBack={handleBack} />
         )} */}
 
         {/* Reset Button (for demo purposes) */}
