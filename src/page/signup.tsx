@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -13,22 +15,37 @@ import {
 } from "@/ui/card";
 import { authService } from "../lib/auth";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { postSignup } from "@/api/login";
+import { useMutation } from "@tanstack/react-query";
 
 export function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (data: { email: string; password: string }) => postSignup(data),
+    onSuccess: () => {
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
+    },
+    onError: (error: any) => {
+      setError(error.message || "회원가입에 실패했습니다.");
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword) {
       setError("모든 필드를 입력해주세요.");
       return;
     }
@@ -38,12 +55,7 @@ export function SignupPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("비밀번호는 최소 6자 이상이어야 합니다.");
-      return;
-    }
-
-    const success = authService.signup(email, password, name);
+    const success = authService.signup(email, password);
 
     if (success) {
       setSuccess(true);
@@ -93,18 +105,6 @@ export function SignupPage() {
                   </span>
                 </div>
               )}
-
-              <div className="space-y-2">
-                <Label htmlFor="name">이름</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="홍길동"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  autoComplete="name"
-                />
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">이메일</Label>

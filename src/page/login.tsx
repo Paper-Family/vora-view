@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/ui/button";
