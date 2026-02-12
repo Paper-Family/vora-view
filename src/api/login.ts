@@ -2,7 +2,6 @@ import url from "@/url";
 
 export type SignupRequest = {
   email: string;
-  name: string;
   password: string;
 };
 
@@ -10,9 +9,7 @@ export type SignupResponse = {
   message: string;
 };
 
-export async function signupApi(
-  body: SignupRequest,
-): Promise<SignupResponse> {
+export async function postSignup(body: SignupRequest): Promise<SignupResponse> {
   const res = await fetch(`${url.SIGNUP}`, {
     method: "POST",
     headers: {
@@ -25,6 +22,8 @@ export async function signupApi(
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.message ?? "Signup failed");
+  } else {
+    console.log("Signup successful:", console.log(res.clone().json()));
   }
 
   return res.json();
@@ -39,9 +38,7 @@ export type LoginResponse = {
   message: string;
 };
 
-export async function loginApi(
-  body: LoginRequest,
-): Promise<LoginResponse> {
+export async function postLogin(body: LoginRequest): Promise<LoginResponse> {
   const res = await fetch(`${url.LOGIN}`, {
     method: "POST",
     headers: {
@@ -64,7 +61,7 @@ export type LogoutResponse = {
   message: string;
 };
 
-export async function logoutApi(): Promise<LogoutResponse> {
+export async function getLogout(): Promise<LogoutResponse> {
   const res = await fetch(`${url.LOGOUT}`, {
     method: "GET",
     cache: "no-store",

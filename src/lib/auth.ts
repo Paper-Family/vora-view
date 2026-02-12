@@ -5,7 +5,7 @@ export interface User {
 }
 
 export const authService = {
-  signup: (email: string, password: string, name: string): boolean => {
+  signup: (email: string, password: string): boolean => {
     const users = JSON.parse(localStorage.getItem("vora_users") || "[]");
 
     if (users.some((u: User & { password: string }) => u.email === email)) {
@@ -16,7 +16,6 @@ export const authService = {
       id: crypto.randomUUID(),
       email,
       password,
-      name,
     };
 
     users.push(newUser);
