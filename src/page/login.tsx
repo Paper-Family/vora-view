@@ -1,5 +1,9 @@
+"use client";
+
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
@@ -14,7 +18,7 @@ import { authService } from "@/lib/auth";
 import { AlertCircle } from "lucide-react";
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +35,7 @@ export function LoginPage() {
     const user = authService.login(email, password);
 
     if (user) {
-      navigate("/");
+      router.push("/");
     } else {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
     }
@@ -98,7 +102,7 @@ export function LoginPage() {
               <div className="text-center text-sm text-gray-600">
                 계정이 없으신가요?{" "}
                 <Link
-                  to="/signup"
+                  href="/signup"
                   className="text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   회원가입

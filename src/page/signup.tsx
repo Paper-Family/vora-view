@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
@@ -10,11 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/ui/card";
-import { authService } from "../../lib/auth";
+import { authService } from "../lib/auth";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export function SignupPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +48,7 @@ export function SignupPage() {
     if (success) {
       setSuccess(true);
       setTimeout(() => {
-        navigate("/login");
+        router.push("/login");
       }, 1500);
     } else {
       setError("이미 존재하는 이메일입니다.");
@@ -148,7 +149,7 @@ export function SignupPage() {
               <div className="text-center text-sm text-gray-600">
                 이미 계정이 있으신가요?{" "}
                 <Link
-                  to="/login"
+                  href="/login"
                   className="text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   로그인
