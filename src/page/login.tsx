@@ -15,12 +15,29 @@ import {
 } from "@/ui/card";
 import { authService } from "@/lib/auth";
 import { AlertCircle } from "lucide-react";
+import { postLogin } from "@/api/login";
+import { useMutation } from "@tanstack/react-query";
 
 export function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (data: { name: string; email: string; password: string }) =>
+      postLogin(data),
+    onSuccess: () => {
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/");
+      }, 1500);
+    },
+    onError: (error: any) => {
+      setError(error.message || "로그인에 실패했습니다.");
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
