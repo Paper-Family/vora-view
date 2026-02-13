@@ -20,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 
 export function SignupPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,12 +29,13 @@ export function SignupPage() {
   const [isPending, setIsPending] = useState(false);
 
   const mutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) => postSignup(data),
+    mutationFn: (data: { name: string; email: string; password: string }) =>
+      postSignup(data),
     onSuccess: () => {
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/login");
-      }, 1500);
+      // setTimeout(() => {
+      //   router.push("/login");
+      // }, 1500);
     },
     onError: (error: any) => {
       setError(error.message || "회원가입에 실패했습니다.");
@@ -57,6 +59,9 @@ export function SignupPage() {
 
     const success = authService.signup(email, password);
 
+    mutation.mutate({ name, email, password });
+
+    // console.log(success);
     if (success) {
       setSuccess(true);
       setTimeout(() => {
@@ -107,6 +112,18 @@ export function SignupPage() {
               )}
 
               <div className="space-y-2">
+                <Label htmlFor="name">이름</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="홍길동"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="email">이메일</Label>
                 <Input
                   id="email"
@@ -142,8 +159,12 @@ export function SignupPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={success}>
-                회원가입
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={mutation.isPending || success}
+              >
+                {mutation.isPending ? "가입 중..." : "회원가입"}
               </Button>
 
               <div className="text-center text-sm text-gray-600">

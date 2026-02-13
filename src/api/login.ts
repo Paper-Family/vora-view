@@ -1,6 +1,7 @@
 import url from "@/url";
 
 export type SignupRequest = {
+  name: string;
   email: string;
   password: string;
 };
