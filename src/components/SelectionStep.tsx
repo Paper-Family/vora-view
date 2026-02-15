@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar } from "lucide-react";
 import { Button } from "@/ui/button";
 import { Label } from "@/ui/label";
@@ -9,13 +11,19 @@ import {
   SelectValue,
 } from "@/ui/select";
 import { categories } from "@/mock/data";
+import { useMutation } from "@tanstack/react-query";
+import { getArticles } from "@/api/article";
+import type { GetArticleResponse } from "@/api/article";
 
 interface SelectionStepProps {
   selectedDate: string;
   selectedCategory: string;
   onDateChange: (date: string) => void;
   onCategoryChange: (category: string) => void;
-  onSubmit: () => void;
+
+  onArticlesLoaded?: (data: GetArticleResponse) => void;
+
+  onSubmit?: () => void;
 }
 
 export function SelectionStep({
@@ -23,9 +31,24 @@ export function SelectionStep({
   selectedCategory,
   onDateChange,
   onCategoryChange,
+  onArticlesLoaded,
   onSubmit,
 }: SelectionStepProps) {
-  const isValid = selectedDate && selectedCategory;
+  // console.log("=", selectedDate);
+  const isValid = selectedDate;
+  const mutation = useMutation({
+    mutationFn: (params: { sort?: string; page?: number; limit?: number }) =>
+      getArticles(params),
+    onSuccess: (data) => {
+      onArticlesLoaded?.(data);
+      onSubmit?.();
+      console.log("Articles loaded:", data);
+    },
+    onError: (err: any) => {
+      alert(err?.message ?? "기사 불러오기에 실패했습니다.");
+    },
+    retry: false,
+  });
 
   return (
     <div className="max-w-xl mx-auto">
@@ -54,7 +77,7 @@ export function SelectionStep({
             />
           </div>
 
-          <div>
+          {/* <div>
             <Label htmlFor="category">카테고리 선택</Label>
             <Select value={selectedCategory} onValueChange={onCategoryChange}>
               <SelectTrigger id="category" className="w-full mt-2">
@@ -68,15 +91,30 @@ export function SelectionStep({
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           <Button
-            onClick={onSubmit}
-            disabled={!isValid}
+            onClick={() => {
+              if (!isValid || mutation.isPending) return;
+
+              mutation.mutate({
+                // page: 1,
+                // limit: 10,
+                sort: "date",
+              });
+            }}
+            disabled={!isValid || mutation.isPending}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6"
           >
-            기사 요청
+            {mutation.isPending ? "불러오는 중..." : "기사 요청"}
           </Button>
+
+          {/* (옵션) 간단한 상태 표시 */}
+          {/* {mutation.isSuccess && (
+            <p className="text-sm text-green-600">
+              기사 {mutation.data?.articles?.length ?? 0}개 불러옴
+            </p>
+          )} */}
         </div>
       </div>
     </div>

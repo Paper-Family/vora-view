@@ -31,7 +31,6 @@ export default function HomePage() {
   };
 
   const handleRefresh = () => {
-    // 담지 않은 기사들의 ID를 제외 목록에 추가
     const unsavedIds = articles
       .filter(
         (article) => !savedArticles.some((saved) => saved.id === article.id)
@@ -41,10 +40,8 @@ export default function HomePage() {
     const newExcludedIds = [...excludedIds, ...unsavedIds];
     setExcludedIds(newExcludedIds);
 
-    // 새로운 기사 가져오기 (담긴 기사 + 새 기사)
     const newArticles = getArticlesByCategory(selectedCategory, newExcludedIds);
 
-    // 담긴 기사는 유지하고, 나머지를 새 기사로 교체
     const combinedArticles = [
       ...savedArticles,
       ...newArticles.filter(

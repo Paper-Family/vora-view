@@ -26,13 +26,11 @@ export function LoginPage() {
   const [success, setSuccess] = useState(false);
 
   const mutation = useMutation({
-    mutationFn: (data: { name: string; email: string; password: string }) =>
-      postLogin(data),
+    mutationFn: (data: { email: string; password: string }) => postLogin(data),
     onSuccess: () => {
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/");
-      }, 1500);
+      setTimeout(() => router.push("/"), 1500);
+      localStorage.setItem("vora_current_user", JSON.stringify({ email }));
     },
     onError: (error: any) => {
       setError(error.message || "로그인에 실패했습니다.");
@@ -48,13 +46,7 @@ export function LoginPage() {
       return;
     }
 
-    const user = authService.login(email, password);
-
-    if (user) {
-      router.push("/");
-    } else {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
-    }
+    mutation.mutate({ email, password });
   };
 
   return (
@@ -114,8 +106,9 @@ export function LoginPage() {
               <Button
                 type="submit"
                 className="w-full hover:bg-blue-600 cursor-pointer"
+                disabled={mutation.isPending}
               >
-                로그인
+                {mutation.isPending ? "로그인 중..." : "로그인"}
               </Button>
 
               <div className="text-center text-sm text-gray-600">
