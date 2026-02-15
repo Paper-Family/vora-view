@@ -111,7 +111,10 @@ export function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full hover:bg-blue-600 cursor-pointer"
+              >
                 로그인
               </Button>
 
