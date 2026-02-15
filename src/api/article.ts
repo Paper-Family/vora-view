@@ -2,12 +2,16 @@ import url from "@/url";
 
 export type Article = {
   _id: string;
-  title: string;
-  hooking: string;
-  summary: string;
+  analysis: string;
   author: string;
   date: string;
+  hooking: string;
+  keywords: string[];
+  link: string;
+  sectors: string[];
   source: string;
+  summary: string;
+  title: string;
 };
 
 export type GetArticleResponse = {
@@ -19,47 +23,41 @@ export type PostArticleResponse = {
   articlers: Article[];
 };
 
-
 type GetArticleParams = {
   page?: number;
   limit?: number;
   sort?: string;
 };
 
-export async function getArticles(
-  params?: GetArticleParams,
-): Promise<GetArticleResponse> {
-  const query = new URLSearchParams(
-    params as Record<string, string>,
-  ).toString();
+export async function getArticles(params?: GetArticleParams) {
+  const searchParams = new URLSearchParams();
 
-  const res = await fetch(
-    `${url.ARTICLES}?${query}`,
-    {
-      method: "GET",
-      cache: "no-store",
-    },
-  );
+  if (params?.page !== undefined) searchParams.set("page", String(params.page));
+  if (params?.limit !== undefined)
+    searchParams.set("limit", String(params.limit));
+  if (params?.sort) searchParams.set("sort", params.sort);
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch articles");
-  }
+  const qs = searchParams.toString();
 
+  const endpoint = url.ARTICLE;
+
+  const res = await fetch(`${endpoint}${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch articles");
   return res.json();
 }
 
 export async function postArticle(): Promise<PostArticleResponse> {
-  const res = await fetch(
-    `${url.ARTICLES}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}), // 현재는 빈 body
-      cache: "no-store",
+  const res = await fetch(`${url.ARTICLE}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({}),
+  });
 
   if (!res.ok) {
     throw new Error("POST /api/article failed");
