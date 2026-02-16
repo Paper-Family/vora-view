@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
@@ -13,17 +13,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/ui/card";
-import { authService } from "@/lib/auth";
 import { AlertCircle } from "lucide-react";
-import { postLogin } from "@/api/login";
+import { postLogin } from "@/app/api/login";
 import { useMutation } from "@tanstack/react-query";
+import { useRef } from "react";
+import { useEffect } from "react";
+
+type Notice = { type: "error" | "info" | "success"; message: string } | null;
 
 export function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [notice, setNotice] = useState<Notice>(null);
+  const timerRef = useRef<number | null>(null);
+  const showNotice = (n: Exclude<Notice, null>, ms = 2500) => {
+    setNotice(n);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setNotice(null), ms);
+  };
+  const shownRef = useRef(false);
+
+  useEffect(() => {
+    if (shownRef.current) return;
+    shownRef.current = true;
+
+    const reason = searchParams.get("reason");
+    if (reason === "not_authenticated") {
+      showNotice(
+        { type: "info", message: "로그인이 필요한 서비스입니다." },
+        3000
+      );
+    }
+  }, [searchParams]);
 
   const mutation = useMutation({
     mutationFn: (data: { email: string; password: string }) => postLogin(data),
@@ -51,6 +77,14 @@ export function LoginPage() {
 
   return (
     <div className="size-full bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 flex items-center justify-center p-4">
+      {notice && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
+          <div className="flex items-center gap-2 text-sm p-3 rounded-lg border shadow-sm text-red-700 bg-red-50 border-red-200">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>{notice.message}</span>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">

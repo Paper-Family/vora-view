@@ -15,7 +15,7 @@ import {
 } from "@/ui/card";
 import { authService } from "../lib/auth";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { postSignup } from "@/api/login";
+import { postSignup } from "@/app/api/login";
 import { useMutation } from "@tanstack/react-query";
 
 export function SignupPage() {
