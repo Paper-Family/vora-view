@@ -5,8 +5,17 @@ export type SignupRequest = {
   email: string;
   password: string;
 };
-
 export type SignupResponse = {
+  message: string;
+};
+export type LogoutResponse = {
+  message: string;
+};
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
+export type LoginResponse = {
   message: string;
 };
 
@@ -29,50 +38,28 @@ export async function postSignup(body: SignupRequest): Promise<SignupResponse> {
 
   return res.json();
 }
-
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
-
-export type LoginResponse = {
-  message: string;
-};
-
 export async function postLogin(body: LoginRequest): Promise<LoginResponse> {
-  const res = await fetch(`${url.LOGIN}`, {
+  const res = await fetch("/api/auth/login", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    credentials: "include",
     cache: "no-store",
-    // credentials: "include",
   });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message ?? "Login failed");
-  }
-
-  return res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message ?? "Login failed");
+  return data;
 }
 
-export type LogoutResponse = {
-  message: string;
-};
-
 export async function getLogout(): Promise<LogoutResponse> {
-  const res = await fetch(`${url.LOGOUT}`, {
+  const res = await fetch("/api/auth/logout", {
     method: "GET",
+    credentials: "include",
     cache: "no-store",
-    // credentials: "include",
   });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message ?? "Logout failed");
-  }
-
-  return res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message ?? "Logout failed");
+  return data;
 }

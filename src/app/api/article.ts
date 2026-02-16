@@ -30,19 +30,15 @@ type GetArticleParams = {
 };
 
 export async function getArticles(params?: GetArticleParams) {
-  const searchParams = new URLSearchParams();
+  const sp = new URLSearchParams();
+  if (params?.page) sp.set("page", String(params.page));
+  if (params?.limit) sp.set("limit", String(params.limit));
+  if (params?.sort) sp.set("sort", params.sort);
 
-  if (params?.page !== undefined) searchParams.set("page", String(params.page));
-  if (params?.limit !== undefined)
-    searchParams.set("limit", String(params.limit));
-  if (params?.sort) searchParams.set("sort", params.sort);
-
-  const qs = searchParams.toString();
-
-  const endpoint = url.ARTICLE;
-
-  const res = await fetch(`${endpoint}${qs ? `?${qs}` : ""}`, {
+  const qs = sp.toString();
+  const res = await fetch(`/api/article${qs ? `?${qs}` : ""}`, {
     method: "GET",
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -50,18 +46,13 @@ export async function getArticles(params?: GetArticleParams) {
   return res.json();
 }
 
-export async function postArticle(): Promise<PostArticleResponse> {
-  const res = await fetch(`${url.ARTICLE}`, {
+export async function postArticle() {
+  const res = await fetch("/api/article", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({}),
+    credentials: "include",
+    cache: "no-store",
   });
 
-  if (!res.ok) {
-    throw new Error("POST /api/article failed");
-  }
-
+  if (!res.ok) throw new Error("POST /api/article failed");
   return res.json();
 }

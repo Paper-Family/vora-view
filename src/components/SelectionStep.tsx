@@ -12,8 +12,8 @@ import {
 } from "@/ui/select";
 import { categories } from "@/mock/data";
 import { useMutation } from "@tanstack/react-query";
-import { getArticles } from "@/api/article";
-import type { GetArticleResponse } from "@/api/article";
+import { getArticles } from "@/app/api/article";
+import type { GetArticleResponse } from "@/app/api/article";
 
 interface SelectionStepProps {
   selectedDate: string;
