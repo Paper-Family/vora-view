@@ -1,14 +1,14 @@
 import { Bookmark, RefreshCw, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/ui/button";
 import { Badge } from "@/ui/badge";
-import { Article } from "@/mock/data";
+import type { Article } from "@/app/api/article";
 
 interface ArticlesStepProps {
   articles: Article[];
   savedArticles: Article[];
   onSaveArticle: (article: Article) => void;
   onUnsaveArticle: (articleId: string) => void;
-  onRefresh: () => void;
+  // onRefresh: () => void;
   onConfirm: () => void;
 }
 
@@ -17,11 +17,11 @@ export function ArticlesStep({
   savedArticles,
   onSaveArticle,
   onUnsaveArticle,
-  onRefresh,
+  // onRefresh,
   onConfirm,
 }: ArticlesStepProps) {
   const isSaved = (articleId: string) =>
-    savedArticles.some((a) => a.id === articleId);
+    savedArticles.some((a) => a._id === articleId);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -34,7 +34,11 @@ export function ArticlesStep({
             </p>
           </div>
           <div className="flex gap-3">
-            <Button onClick={onRefresh} variant="outline" className="gap-2">
+            <Button
+              // onClick={onRefresh}
+              variant="outline"
+              className="gap-2"
+            >
               <RefreshCw size={16} />
               재요청
             </Button>
@@ -52,11 +56,11 @@ export function ArticlesStep({
 
       <div className="space-y-4">
         {articles.map((article) => {
-          const saved = isSaved(article.id);
+          const saved = isSaved(article._id);
 
           return (
             <div
-              key={article.id}
+              key={article._id}
               className={`bg-white rounded-xl shadow-sm border-2 p-6 transition-all ${
                 saved
                   ? "border-blue-500 bg-blue-50/30"
@@ -70,7 +74,7 @@ export function ArticlesStep({
                       {article.source}
                     </Badge>
                     <span className="text-xs text-gray-500">
-                      {article.publishedAt}
+                      {article.date}
                     </span>
                   </div>
 
@@ -81,7 +85,7 @@ export function ArticlesStep({
                   </p>
 
                   <a
-                    href={article.url}
+                    href={article.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
@@ -93,7 +97,9 @@ export function ArticlesStep({
 
                 <Button
                   onClick={() =>
-                    saved ? onUnsaveArticle(article.id) : onSaveArticle(article)
+                    saved
+                      ? onUnsaveArticle(article._id)
+                      : onSaveArticle(article)
                   }
                   variant={saved ? "default" : "outline"}
                   className={`flex-shrink-0 gap-2 ${

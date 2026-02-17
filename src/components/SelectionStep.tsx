@@ -3,46 +3,35 @@
 import { Calendar } from "lucide-react";
 import { Button } from "@/ui/button";
 import { Label } from "@/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/ui/select";
-import { categories } from "@/mock/data";
 import { useMutation } from "@tanstack/react-query";
 import { getArticles } from "@/app/api/article";
-import type { GetArticleResponse } from "@/app/api/article";
+import type { Article, GetArticleResponse } from "@/app/api/article";
 
 interface SelectionStepProps {
+  articles: [Article[], React.Dispatch<React.SetStateAction<Article[]>>];
   selectedDate: string;
-  selectedCategory: string;
   onDateChange: (date: string) => void;
-  onCategoryChange: (category: string) => void;
-
   onArticlesLoaded?: (data: GetArticleResponse) => void;
-
   onSubmit?: () => void;
 }
 
 export function SelectionStep({
+  articles,
   selectedDate,
-  selectedCategory,
   onDateChange,
-  onCategoryChange,
   onArticlesLoaded,
   onSubmit,
 }: SelectionStepProps) {
   // console.log("=", selectedDate);
   const isValid = selectedDate;
+  const [articleList, setArticleList] = articles;
   const mutation = useMutation({
     mutationFn: (params: { sort?: string; page?: number; limit?: number }) =>
       getArticles(params),
     onSuccess: (data) => {
       onArticlesLoaded?.(data);
       onSubmit?.();
-      console.log("Articles loaded:", data);
+      setArticleList(data.articles);
     },
     onError: (err: any) => {
       alert(err?.message ?? "기사 불러오기에 실패했습니다.");
@@ -77,22 +66,6 @@ export function SelectionStep({
             />
           </div>
 
-          {/* <div>
-            <Label htmlFor="category">카테고리 선택</Label>
-            <Select value={selectedCategory} onValueChange={onCategoryChange}>
-              <SelectTrigger id="category" className="w-full mt-2">
-                <SelectValue placeholder="카테고리를 선택하세요" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
-
           <Button
             onClick={() => {
               if (!isValid || mutation.isPending) return;
@@ -108,13 +81,6 @@ export function SelectionStep({
           >
             {mutation.isPending ? "불러오는 중..." : "기사 요청"}
           </Button>
-
-          {/* (옵션) 간단한 상태 표시 */}
-          {/* {mutation.isSuccess && (
-            <p className="text-sm text-green-600">
-              기사 {mutation.data?.articles?.length ?? 0}개 불러옴
-            </p>
-          )} */}
         </div>
       </div>
     </div>

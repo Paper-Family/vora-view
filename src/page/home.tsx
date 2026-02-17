@@ -4,21 +4,20 @@ import { useState } from "react";
 import { SelectionStep } from "@/components/SelectionStep";
 import { ArticlesStep } from "@/components/ArticleStep";
 import { SummaryStep } from "@/components/SummaryStep";
-import { Article, getArticlesByCategory } from "@/mock/data";
+import type { Article } from "@/app/api/article";
 
 type Step = "selection" | "articles" | "summary";
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<Step>("selection");
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const handleSubmitSelection = () => {
-    const newArticles = getArticlesByCategory(selectedCategory, excludedIds);
-    setArticles(newArticles);
+    setArticles(articles);
     setCurrentStep("articles");
   };
 
@@ -27,30 +26,30 @@ export default function HomePage() {
   };
 
   const handleUnsaveArticle = (articleId: string) => {
-    setSavedArticles((prev) => prev.filter((a) => a.id !== articleId));
+    setSavedArticles((prev) => prev.filter((a) => a._id !== articleId));
   };
 
-  const handleRefresh = () => {
-    const unsavedIds = articles
-      .filter(
-        (article) => !savedArticles.some((saved) => saved.id === article.id)
-      )
-      .map((article) => article.id);
+  // const handleRefresh = () => {
+  //   const unsavedIds = articles
+  //     .filter(
+  //       (article) => !savedArticles.some((saved) => saved._id === article._id)
+  //     )
+  //     .map((article) => article._id);
 
-    const newExcludedIds = [...excludedIds, ...unsavedIds];
-    setExcludedIds(newExcludedIds);
+  //   const newExcludedIds = [...excludedIds, ...unsavedIds];
+  //   setExcludedIds(newExcludedIds);
 
-    const newArticles = getArticlesByCategory(selectedCategory, newExcludedIds);
+  //   const newArticles = getArticlesByCategory(selectedCategory, newExcludedIds);
 
-    const combinedArticles = [
-      ...savedArticles,
-      ...newArticles.filter(
-        (article) => !savedArticles.some((saved) => saved.id === article.id)
-      ),
-    ].slice(0, 5);
+  //   const combinedArticles = [
+  //     ...savedArticles,
+  //     ...newArticles.filter(
+  //       (article) => !savedArticles.some((saved) => saved.id === article.id)
+  //     ),
+  //   ].slice(0, 5);
 
-    setArticles(combinedArticles);
-  };
+  //   setArticles(combinedArticles);
+  // };
 
   const handleConfirm = () => {
     setCurrentStep("summary");
@@ -63,7 +62,6 @@ export default function HomePage() {
   const handleReset = () => {
     setCurrentStep("selection");
     setSelectedDate("");
-    setSelectedCategory("");
     setArticles([]);
     setSavedArticles([]);
     setExcludedIds([]);
@@ -72,7 +70,6 @@ export default function HomePage() {
   return (
     <div className="size-full bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 overflow-auto">
       <div className="min-h-full py-12 px-4">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-block px-4 py-1.5 bg-blue-600 text-white rounded-full text-sm mb-4">
             VORA AI News Curation
@@ -135,10 +132,9 @@ export default function HomePage() {
         {currentStep === "selection" && (
           <SelectionStep
             selectedDate={selectedDate}
-            selectedCategory={selectedCategory}
             onDateChange={setSelectedDate}
-            onCategoryChange={setSelectedCategory}
             onSubmit={handleSubmitSelection}
+            articles={[articles, setArticles]}
           />
         )}
 
@@ -148,14 +144,14 @@ export default function HomePage() {
             savedArticles={savedArticles}
             onSaveArticle={handleSaveArticle}
             onUnsaveArticle={handleUnsaveArticle}
-            onRefresh={handleRefresh}
+            // onRefresh={handleRefresh}
             onConfirm={handleConfirm}
           />
         )}
 
-        {currentStep === "summary" && (
+        {/* {currentStep === "summary" && (
           <SummaryStep savedArticles={savedArticles} onBack={handleBack} />
-        )}
+        )} */}
 
         {/* Reset Button (for demo purposes) */}
         {currentStep !== "selection" && (
