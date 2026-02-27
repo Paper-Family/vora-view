@@ -56,14 +56,14 @@ import { cookies } from "next/headers";
 const BACKEND = "https://vora-api.onrender.com";
 
 export async function GET(req: Request) {
-  const { search } = new URL(req.url);
-  const cookieHeader = cookies().toString();
+  const url = new URL(req.url);
+  const cookie = req.headers.get("cookie") ?? "";
 
-  const backendRes = await fetch(`${BACKEND}/api/article${search}`, {
+  const backendRes = await fetch(`${BACKEND}/api/article${url.search}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Cookie: cookieHeader,
+      Cookie: cookie,
     },
     cache: "no-store",
   });
@@ -72,14 +72,14 @@ export async function GET(req: Request) {
   return NextResponse.json(data, { status: backendRes.status });
 }
 
-export async function POST() {
-  const cookieHeader = cookies().toString();
+export async function POST(req: Request) {
+  const cookie = req.headers.get("cookie") ?? "";
 
   const backendRes = await fetch(`${BACKEND}/api/article`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Cookie: cookieHeader,
+      Cookie: cookie, // ✅
     },
     body: JSON.stringify({}),
     cache: "no-store",
