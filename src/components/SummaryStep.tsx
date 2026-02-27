@@ -7,95 +7,94 @@ import {
   Newspaper,
 } from "lucide-react";
 import { Button } from "@/ui/button";
-import { Article } from "@/mock/data";
 import { Badge } from "@/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { useState } from "react";
 
 interface SummaryStepProps {
-  savedArticles: Article[];
+  // savedArticles: Article[];
   onBack: () => void;
 }
 
-export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
-  const [activeFormat, setActiveFormat] = useState<string>("summary");
+export function SummaryStep({ onBack }: SummaryStepProps) {
+  // const [activeFormat, setActiveFormat] = useState<string>("summary");
 
-  const generateSummary = () => {
-    const titles = savedArticles.map((a) => `• ${a.title}`).join("\n");
-    return `📰 뉴스 큐레이션 요약 (${savedArticles.length}개 기사)\n\n${titles}\n\n주요 트렌드:\n선별된 기사들은 최신 산업 동향과 혁신 기술을 다루고 있으며, 시장의 변화와 미래 전망을 제시하고 있습니다.`;
-  };
+  // const generateSummary = () => {
+  //   const titles = savedArticles.map((a) => `• ${a.title}`).join("\n");
+  //   return `📰 뉴스 큐레이션 요약 (${savedArticles.length}개 기사)\n\n${titles}\n\n주요 트렌드:\n선별된 기사들은 최신 산업 동향과 혁신 기술을 다루고 있으며, 시장의 변화와 미래 전망을 제시하고 있습니다.`;
+  // };
 
-  const generateInstagram = () => {
-    const mainTitle = savedArticles[0]?.title || "";
-    return `📱 Instagram Post\n\n🔥 ${mainTitle}\n\n오늘의 주요 뉴스 ${
-      savedArticles.length
-    }가지를 정리했습니다!\n\n${savedArticles
-      .slice(0, 3)
-      .map((a, i) => `${i + 1}. ${a.title.slice(0, 40)}...`)
-      .join("\n")}\n\n#뉴스 #트렌드 #정보 #큐레이션`;
-  };
+  // const generateInstagram = () => {
+  //   const mainTitle = savedArticles[0]?.title || "";
+  //   return `📱 Instagram Post\n\n🔥 ${mainTitle}\n\n오늘의 주요 뉴스 ${
+  //     savedArticles.length
+  //   }가지를 정리했습니다!\n\n${savedArticles
+  //     .slice(0, 3)
+  //     .map((a, i) => `${i + 1}. ${a.title.slice(0, 40)}...`)
+  //     .join("\n")}\n\n#뉴스 #트렌드 #정보 #큐레이션`;
+  // };
 
-  const generateBlog = () => {
-    return `# 뉴스 큐레이션: ${new Date().toLocaleDateString(
-      "ko-KR"
-    )}\n\n## 개요\n오늘 선별한 ${
-      savedArticles.length
-    }개의 주요 기사를 분석하여 핵심 인사이트를 정리했습니다.\n\n${savedArticles
-      .map(
-        (a, i) =>
-          `## ${i + 1}. ${a.title}\n\n**출처:** ${a.source}\n\n${
-            a.summary
-          }\n\n---\n`
-      )
-      .join(
-        "\n"
-      )}\n## 결론\n선별된 기사들을 통해 현재 산업의 주요 동향과 미래 전망을 확인할 수 있습니다.`;
-  };
+  // const generateBlog = () => {
+  //   return `# 뉴스 큐레이션: ${new Date().toLocaleDateString(
+  //     "ko-KR"
+  //   )}\n\n## 개요\n오늘 선별한 ${
+  //     savedArticles.length
+  //   }개의 주요 기사를 분석하여 핵심 인사이트를 정리했습니다.\n\n${savedArticles
+  //     .map(
+  //       (a, i) =>
+  //         `## ${i + 1}. ${a.title}\n\n**출처:** ${a.source}\n\n${
+  //           a.summary
+  //         }\n\n---\n`
+  //     )
+  //     .join(
+  //       "\n"
+  //     )}\n## 결론\n선별된 기사들을 통해 현재 산업의 주요 동향과 미래 전망을 확인할 수 있습니다.`;
+  // };
 
-  const generateShorts = () => {
-    return `🎬 YouTube Shorts 스크립트\n\n[오프닝 - 3초]\n"오늘의 핵심 뉴스 ${
-      savedArticles.length
-    }가지!"\n\n${savedArticles
-      .slice(0, 3)
-      .map(
-        (a, i) =>
-          `[${i + 1}번째 뉴스 - 7초]\n${a.title}\n${a.summary.slice(
-            0,
-            60
-          )}...\n`
-      )
-      .join("\n")}\n[엔딩 - 2초]\n"자세한 내용은 설명란에서 확인하세요!"`;
-  };
+  // const generateShorts = () => {
+  //   return `🎬 YouTube Shorts 스크립트\n\n[오프닝 - 3초]\n"오늘의 핵심 뉴스 ${
+  //     savedArticles.length
+  //   }가지!"\n\n${savedArticles
+  //     .slice(0, 3)
+  //     .map(
+  //       (a, i) =>
+  //         `[${i + 1}번째 뉴스 - 7초]\n${a.title}\n${a.summary.slice(
+  //           0,
+  //           60
+  //         )}...\n`
+  //     )
+  //     .join("\n")}\n[엔딩 - 2초]\n"자세한 내용은 설명란에서 확인하세요!"`;
+  // };
 
-  const getContent = () => {
-    switch (activeFormat) {
-      case "instagram":
-        return generateInstagram();
-      case "blog":
-        return generateBlog();
-      case "shorts":
-        return generateShorts();
-      default:
-        return generateSummary();
-    }
-  };
+  // const getContent = () => {
+  //   switch (activeFormat) {
+  //     case "instagram":
+  //       return generateInstagram();
+  //     case "blog":
+  //       return generateBlog();
+  //     case "shorts":
+  //       return generateShorts();
+  //     default:
+  //       return generateSummary();
+  //   }
+  // };
 
-  const handleDownload = () => {
-    const content = getContent();
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `vora_${activeFormat}_${Date.now()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  // const handleDownload = () => {
+  //   const content = getContent();
+  //   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `vora_${activeFormat}_${Date.now()}.txt`;
+  //   document.body.appendChild(a);
+  //   a.click();
+  //   document.body.removeChild(a);
+  //   URL.revokeObjectURL(url);
+  // };
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+      {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button onClick={onBack} variant="ghost" className="gap-2">
@@ -113,7 +112,6 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 왼쪽: 선택된 기사 목록 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-4">
             <Newspaper className="text-gray-700" size={20} />
@@ -149,7 +147,6 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
           </div>
         </div>
 
-        {/* 오른쪽: 포맷 변환 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h3 className="mb-4">콘텐츠 포맷 변환</h3>
 
@@ -197,7 +194,8 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </div> */}
+      asdf
     </div>
   );
 }
