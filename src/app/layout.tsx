@@ -1,20 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Welcome to Vora",
+  title: "VORA Studio | 미주 뉴스 콘텐츠 제작",
+  description: "미국 주식 뉴스를 선별해 인스타그램과 블로그 원고로 만드는 운영자 콘텐츠 스튜디오",
 };
 
 export default function RootLayout({
@@ -24,9 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="kr">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

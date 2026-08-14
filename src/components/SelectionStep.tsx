@@ -24,9 +24,14 @@ export function SelectionStep({
 }: SelectionStepProps) {
   // console.log("=", selectedDate);
   const isValid = selectedDate;
-  const [articleList, setArticleList] = articles;
+  const [, setArticleList] = articles;
   const mutation = useMutation({
-    mutationFn: (params: { sort?: string; page?: number; limit?: number }) =>
+    mutationFn: (params: {
+      sort?: string;
+      page?: number;
+      limit?: number;
+      date?: string;
+    }) =>
       getArticles(params),
     onSuccess: (data) => {
       onArticlesLoaded?.(data);
@@ -49,7 +54,7 @@ export function SelectionStep({
           <div>
             <h2>뉴스 큐레이션 요청</h2>
             <p className="text-gray-600 text-sm">
-              날짜와 카테고리를 선택해주세요
+              발행할 날짜의 수집 기사를 불러오세요
             </p>
           </div>
         </div>
@@ -71,9 +76,9 @@ export function SelectionStep({
               if (!isValid || mutation.isPending) return;
 
               mutation.mutate({
-                // page: 1,
-                // limit: 10,
-                sort: "date",
+                sort: "-date",
+                limit: 30,
+                date: selectedDate,
               });
             }}
             disabled={!isValid || mutation.isPending}

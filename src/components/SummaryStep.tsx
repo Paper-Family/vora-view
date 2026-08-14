@@ -1,201 +1,204 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import {
-  Instagram,
-  FileText,
-  Video,
-  Download,
   ArrowLeft,
-  Newspaper,
+  Check,
+  Copy,
+  ExternalLink,
+  FileText,
+  Instagram,
+  LoaderCircle,
+  RefreshCw,
 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/ui/button";
-import { Badge } from "@/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { useState } from "react";
+import { generateContent, type GeneratedContent } from "@/app/api/content";
+import type { Article } from "@/app/api/article";
 
 interface SummaryStepProps {
-  // savedArticles: Article[];
+  savedArticles: Article[];
   onBack: () => void;
 }
 
-export function SummaryStep({ onBack }: SummaryStepProps) {
-  // const [activeFormat, setActiveFormat] = useState<string>("summary");
+function instagramText(content: GeneratedContent) {
+  return [
+    content.instagram.headline,
+    "",
+    content.instagram.caption,
+    "",
+    content.instagram.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" "),
+  ].join("\n");
+}
 
-  // const generateSummary = () => {
-  //   const titles = savedArticles.map((a) => `• ${a.title}`).join("\n");
-  //   return `📰 뉴스 큐레이션 요약 (${savedArticles.length}개 기사)\n\n${titles}\n\n주요 트렌드:\n선별된 기사들은 최신 산업 동향과 혁신 기술을 다루고 있으며, 시장의 변화와 미래 전망을 제시하고 있습니다.`;
-  // };
+function blogText(content: GeneratedContent) {
+  return [
+    `# ${content.blog.title}`,
+    "",
+    content.blog.introduction,
+    "",
+    ...content.blog.sections.flatMap((section) => [
+      `## ${section.heading}`,
+      "",
+      section.body,
+      "",
+    ]),
+    "## 마무리",
+    "",
+    content.blog.conclusion,
+    "",
+    "## 출처",
+    "",
+    ...content.sources.map((source) => `- [${source.source} · ${source.title}](${source.link})`),
+    "",
+    content.blog.tags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" "),
+  ].join("\n");
+}
 
-  // const generateInstagram = () => {
-  //   const mainTitle = savedArticles[0]?.title || "";
-  //   return `📱 Instagram Post\n\n🔥 ${mainTitle}\n\n오늘의 주요 뉴스 ${
-  //     savedArticles.length
-  //   }가지를 정리했습니다!\n\n${savedArticles
-  //     .slice(0, 3)
-  //     .map((a, i) => `${i + 1}. ${a.title.slice(0, 40)}...`)
-  //     .join("\n")}\n\n#뉴스 #트렌드 #정보 #큐레이션`;
-  // };
+export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
+  const [activeFormat, setActiveFormat] = useState("instagram");
+  const [copied, setCopied] = useState(false);
 
-  // const generateBlog = () => {
-  //   return `# 뉴스 큐레이션: ${new Date().toLocaleDateString(
-  //     "ko-KR"
-  //   )}\n\n## 개요\n오늘 선별한 ${
-  //     savedArticles.length
-  //   }개의 주요 기사를 분석하여 핵심 인사이트를 정리했습니다.\n\n${savedArticles
-  //     .map(
-  //       (a, i) =>
-  //         `## ${i + 1}. ${a.title}\n\n**출처:** ${a.source}\n\n${
-  //           a.summary
-  //         }\n\n---\n`
-  //     )
-  //     .join(
-  //       "\n"
-  //     )}\n## 결론\n선별된 기사들을 통해 현재 산업의 주요 동향과 미래 전망을 확인할 수 있습니다.`;
-  // };
+  const mutation = useMutation({
+    mutationFn: () => generateContent(savedArticles.map((article) => article._id)),
+  });
 
-  // const generateShorts = () => {
-  //   return `🎬 YouTube Shorts 스크립트\n\n[오프닝 - 3초]\n"오늘의 핵심 뉴스 ${
-  //     savedArticles.length
-  //   }가지!"\n\n${savedArticles
-  //     .slice(0, 3)
-  //     .map(
-  //       (a, i) =>
-  //         `[${i + 1}번째 뉴스 - 7초]\n${a.title}\n${a.summary.slice(
-  //           0,
-  //           60
-  //         )}...\n`
-  //     )
-  //     .join("\n")}\n[엔딩 - 2초]\n"자세한 내용은 설명란에서 확인하세요!"`;
-  // };
+  const content = mutation.data;
+  const copyValue = useMemo(() => {
+    if (!content) return "";
+    return activeFormat === "instagram" ? instagramText(content) : blogText(content);
+  }, [activeFormat, content]);
 
-  // const getContent = () => {
-  //   switch (activeFormat) {
-  //     case "instagram":
-  //       return generateInstagram();
-  //     case "blog":
-  //       return generateBlog();
-  //     case "shorts":
-  //       return generateShorts();
-  //     default:
-  //       return generateSummary();
-  //   }
-  // };
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(copyValue);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  };
 
-  // const handleDownload = () => {
-  //   const content = getContent();
-  //   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-  //   const url = URL.createObjectURL(blob);
-  //   const a = document.createElement("a");
-  //   a.href = url;
-  //   a.download = `vora_${activeFormat}_${Date.now()}.txt`;
-  //   document.body.appendChild(a);
-  //   a.click();
-  //   document.body.removeChild(a);
-  //   URL.revokeObjectURL(url);
-  // };
-
-  return (
-    <div className="max-w-5xl mx-auto">
-      {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button onClick={onBack} variant="ghost" className="gap-2">
-              <ArrowLeft size={16} />
-              뒤로
-            </Button>
-            <div>
-              <h2>큐레이션 완료</h2>
-              <p className="text-gray-600 text-sm">
-                {savedArticles.length}개의 기사가 선택되었습니다
-              </p>
+  if (!content) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <button onClick={onBack} className="mb-6 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-950">
+          <ArrowLeft size={16} /> 기사 다시 선택하기
+        </button>
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 bg-slate-950 px-8 py-7 text-white">
+            <p className="mb-2 text-sm text-blue-300">VORA CONTENT STUDIO</p>
+            <h2 className="text-2xl font-semibold">선택한 뉴스로 오늘의 콘텐츠를 만드세요</h2>
+            <p className="mt-2 text-sm text-slate-300">인스타그램 게시물과 블로그 원고를 한 번에 생성합니다.</p>
+          </div>
+          <div className="p-8">
+            <div className="mb-8 grid gap-3 sm:grid-cols-2">
+              {savedArticles.map((article, index) => (
+                <div key={article._id} className="rounded-xl border border-slate-200 p-4">
+                  <div className="mb-2 text-xs font-semibold text-blue-600">SOURCE {String(index + 1).padStart(2, "0")}</div>
+                  <p className="line-clamp-2 text-sm font-medium text-slate-900">{article.title}</p>
+                  <p className="mt-2 text-xs text-slate-500">{article.source} · {article.date}</p>
+                </div>
+              ))}
             </div>
+            {mutation.isError && (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {mutation.error.message}
+              </div>
+            )}
+            <Button
+              onClick={() => mutation.mutate()}
+              disabled={mutation.isPending}
+              className="h-12 w-full bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {mutation.isPending ? <LoaderCircle className="animate-spin" /> : <FileText />}
+              {mutation.isPending ? "뉴스를 분석해 원고를 작성하고 있습니다..." : "인스타그램 · 블로그 원고 생성"}
+            </Button>
+            <p className="mt-3 text-center text-xs text-slate-400">생성된 내용은 원문과 수치를 확인한 뒤 발행해 주세요.</p>
           </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Newspaper className="text-gray-700" size={20} />
-            <h3>선택된 기사</h3>
-          </div>
-
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-            {savedArticles.map((article, index) => (
-              <div
-                key={article.id}
-                className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="secondary" className="text-xs">
-                        {article.source}
-                      </Badge>
-                    </div>
-                    <h4 className="text-sm mb-1 text-gray-900">
-                      {article.title}
-                    </h4>
-                    <p className="text-xs text-gray-600 line-clamp-2">
-                      {article.summary}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+  return (
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <button onClick={onBack} className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-950">
+          <ArrowLeft size={16} /> 기사 다시 선택하기
+        </button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+            <RefreshCw className={mutation.isPending ? "animate-spin" : ""} /> 다시 생성
+          </Button>
+          <Button onClick={handleCopy} className="bg-blue-600 text-white hover:bg-blue-700">
+            {copied ? <Check /> : <Copy />} {copied ? "복사 완료" : "원고 복사"}
+          </Button>
         </div>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <h3 className="mb-4">콘텐츠 포맷 변환</h3>
+      <Tabs value={activeFormat} onValueChange={setActiveFormat}>
+        <TabsList className="mb-5 grid h-12 w-full grid-cols-2 bg-slate-200 p-1 sm:w-96">
+          <TabsTrigger value="instagram" className="gap-2"><Instagram /> Instagram</TabsTrigger>
+          <TabsTrigger value="blog" className="gap-2"><FileText /> Blog</TabsTrigger>
+        </TabsList>
 
-          <Tabs value={activeFormat} onValueChange={setActiveFormat}>
-            <TabsList className="grid w-full grid-cols-4 mb-4">
-              <TabsTrigger value="summary" className="gap-1.5 text-xs">
-                <FileText size={14} />
-                요약
-              </TabsTrigger>
-              <TabsTrigger value="instagram" className="gap-1.5 text-xs">
-                <Instagram size={14} />
-                Insta
-              </TabsTrigger>
-              <TabsTrigger value="blog" className="gap-1.5 text-xs">
-                <FileText size={14} />
-                Blog
-              </TabsTrigger>
-              <TabsTrigger value="shorts" className="gap-1.5 text-xs">
-                <Video size={14} />
-                Shorts
-              </TabsTrigger>
-            </TabsList>
+        <TabsContent value="instagram">
+          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+            <div className="space-y-4">
+              {content.instagram.slides.map((slide) => (
+                <article key={slide.order} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-xs font-semibold tracking-widest text-blue-600">SLIDE {String(slide.order).padStart(2, "0")}</span>
+                    <span className="text-xs text-slate-400">VORA DAILY BRIEF</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-950">{slide.title}</h3>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{slide.body}</p>
+                </article>
+              ))}
+            </div>
+            <aside className="h-fit rounded-2xl bg-slate-950 p-6 text-white lg:sticky lg:top-6">
+              <p className="text-xs font-semibold tracking-widest text-blue-300">CAPTION</p>
+              <h3 className="mt-3 text-xl font-semibold">{content.instagram.headline}</h3>
+              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-300">{content.instagram.caption}</p>
+              <p className="mt-5 text-sm leading-7 text-blue-300">
+                {content.instagram.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" ")}
+              </p>
+            </aside>
+          </div>
+        </TabsContent>
 
-            <TabsContent value={activeFormat} className="mt-0">
-              <div className="bg-gray-50 rounded-lg p-4 min-h-[400px] max-h-[500px] overflow-y-auto border border-gray-200">
-                <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans">
-                  {getContent()}
-                </pre>
-              </div>
+        <TabsContent value="blog">
+          <article className="rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-sm sm:px-12 sm:py-12">
+            <div className="mb-10 border-b border-slate-200 pb-8">
+              <p className="text-sm font-semibold text-blue-600">VORA MARKET LETTER</p>
+              <h2 className="mt-3 text-3xl font-semibold leading-tight text-slate-950">{content.blog.title}</h2>
+              <p className="mt-5 leading-8 text-slate-600">{content.blog.introduction}</p>
+            </div>
+            <div className="space-y-10">
+              {content.blog.sections.map((section) => (
+                <section key={section.heading}>
+                  <h3 className="text-xl font-semibold text-slate-900">{section.heading}</h3>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-600">{section.body}</p>
+                </section>
+              ))}
+              <section className="rounded-2xl bg-blue-50 p-6">
+                <h3 className="font-semibold text-blue-950">마무리</h3>
+                <p className="mt-2 leading-8 text-blue-900">{content.blog.conclusion}</p>
+              </section>
+            </div>
+          </article>
+        </TabsContent>
+      </Tabs>
 
-              <Button
-                onClick={handleDownload}
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
-              >
-                <Download size={16} />
-                {activeFormat === "summary"
-                  ? "요약본"
-                  : activeFormat === "instagram"
-                  ? "Instagram 포스트"
-                  : activeFormat === "blog"
-                  ? "Blog 글"
-                  : "Shorts 스크립트"}{" "}
-                다운로드
-              </Button>
-            </TabsContent>
-          </Tabs>
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 className="font-semibold text-slate-900">사용한 출처</h3>
+        <div className="mt-3 space-y-2">
+          {content.sources.map((source) => (
+            <a key={source.link} href={source.link} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-4 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-600">
+              <span className="truncate">{source.source} · {source.title}</span><ExternalLink className="size-4 shrink-0" />
+            </a>
+          ))}
         </div>
-      </div> */}
-      asdf
+        <p className="mt-5 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-400">본 콘텐츠는 정보 제공을 목적으로 하며 특정 금융상품의 매수 또는 매도를 권유하지 않습니다.</p>
+      </div>
     </div>
   );
 }

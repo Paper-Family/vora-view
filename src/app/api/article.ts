@@ -1,5 +1,3 @@
-import url from "@/url";
-
 export type Article = {
   _id: string;
   analysis: string;
@@ -20,13 +18,14 @@ export type GetArticleResponse = {
 };
 
 export type PostArticleResponse = {
-  articlers: Article[];
+  articles: Article[];
 };
 
 type GetArticleParams = {
   page?: number;
   limit?: number;
   sort?: string;
+  date?: string;
 };
 
 export async function getArticles(params?: GetArticleParams) {
@@ -34,6 +33,7 @@ export async function getArticles(params?: GetArticleParams) {
   if (params?.page) sp.set("page", String(params.page));
   if (params?.limit) sp.set("limit", String(params.limit));
   if (params?.sort) sp.set("sort", params.sort);
+  if (params?.date) sp.set("date", params.date);
 
   const qs = sp.toString();
   const res = await fetch(`/api/article${qs ? `?${qs}` : ""}`, {

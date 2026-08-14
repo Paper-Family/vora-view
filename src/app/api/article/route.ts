@@ -51,9 +51,7 @@
 // }
 
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-const BACKEND = "https://vora-api.onrender.com";
+const BACKEND = process.env.VORA_API_URL ?? "https://vora-api.onrender.com";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);

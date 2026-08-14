@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Newspaper, Sparkles } from "lucide-react";
 import { SelectionStep } from "@/components/SelectionStep";
 import { ArticlesStep } from "@/components/ArticleStep";
 import { SummaryStep } from "@/components/SummaryStep";
@@ -13,13 +14,8 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
-  const [excludedIds, setExcludedIds] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const handleSubmitSelection = () => {
-    setArticles(articles);
-    setCurrentStep("articles");
-  };
+  const handleSubmitSelection = () => setCurrentStep("articles");
 
   const handleSaveArticle = (article: Article) => {
     setSavedArticles((prev) => [...prev, article]);
@@ -28,28 +24,6 @@ export default function HomePage() {
   const handleUnsaveArticle = (articleId: string) => {
     setSavedArticles((prev) => prev.filter((a) => a._id !== articleId));
   };
-
-  // const handleRefresh = () => {
-  //   const unsavedIds = articles
-  //     .filter(
-  //       (article) => !savedArticles.some((saved) => saved._id === article._id)
-  //     )
-  //     .map((article) => article._id);
-
-  //   const newExcludedIds = [...excludedIds, ...unsavedIds];
-  //   setExcludedIds(newExcludedIds);
-
-  //   const newArticles = getArticlesByCategory(selectedCategory, newExcludedIds);
-
-  //   const combinedArticles = [
-  //     ...savedArticles,
-  //     ...newArticles.filter(
-  //       (article) => !savedArticles.some((saved) => saved.id === article.id)
-  //     ),
-  //   ].slice(0, 5);
-
-  //   setArticles(combinedArticles);
-  // };
 
   const handleConfirm = () => {
     setCurrentStep("summary");
@@ -64,20 +38,24 @@ export default function HomePage() {
     setSelectedDate("");
     setArticles([]);
     setSavedArticles([]);
-    setExcludedIds([]);
   };
 
   return (
-    <div className="size-full bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 overflow-auto">
-      <div className="min-h-full py-12 px-4">
-        <div className="text-center mb-12">
-          <div className="inline-block px-4 py-1.5 bg-blue-600 text-white rounded-full text-sm mb-4">
-            VORA AI News Curation
+    <div className="min-h-screen overflow-auto bg-[#f5f7fb]">
+      <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 text-white"><Newspaper size={20} /></div>
+            <div><p className="font-semibold text-slate-950">VORA Studio</p><p className="text-xs text-slate-500">US Market Content Desk</p></div>
           </div>
-          <h1 className="mb-2">뉴스 큐레이션 라이브러리</h1>
-          <p className="text-gray-600">
-            AI 기반 뉴스 분석 및 콘텐츠 생성 플랫폼
-          </p>
+          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">Private workspace</span>
+        </div>
+      </header>
+      <div className="min-h-full px-4 py-10">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700"><Sparkles size={14} /> AI News Curation</div>
+          <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">오늘의 미주 콘텐츠를 준비하세요</h1>
+          <p className="text-slate-500">검증할 뉴스를 고르면 인스타그램과 블로그 원고를 한 번에 만듭니다.</p>
         </div>
 
         {/* Progress Indicator */}
@@ -93,7 +71,7 @@ export default function HomePage() {
               <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm">
                 1
               </div>
-              <span className="text-sm">날짜/카테고리 선택</span>
+              <span className="text-sm">날짜 선택</span>
             </div>
 
             <div className="w-8 h-0.5 bg-gray-300"></div>
@@ -144,14 +122,13 @@ export default function HomePage() {
             savedArticles={savedArticles}
             onSaveArticle={handleSaveArticle}
             onUnsaveArticle={handleUnsaveArticle}
-            // onRefresh={handleRefresh}
             onConfirm={handleConfirm}
           />
         )}
 
-        {/* {currentStep === "summary" && (
+        {currentStep === "summary" && (
           <SummaryStep savedArticles={savedArticles} onBack={handleBack} />
-        )} */}
+        )}
 
         {/* Reset Button (for demo purposes) */}
         {currentStep !== "selection" && (
