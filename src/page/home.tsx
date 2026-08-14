@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Newspaper, Sparkles } from "lucide-react";
+import { LogOut, Newspaper, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { SelectionStep } from "@/components/SelectionStep";
 import { ArticlesStep } from "@/components/ArticleStep";
 import { SummaryStep } from "@/components/SummaryStep";
 import type { Article } from "@/app/api/article";
+import { getLogout } from "@/app/api/login";
 
 type Step = "selection" | "articles" | "summary";
 
 export default function HomePage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>("selection");
   const [selectedDate, setSelectedDate] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
@@ -40,6 +43,12 @@ export default function HomePage() {
     setSavedArticles([]);
   };
 
+  const handleLogout = async () => {
+    await getLogout().catch(() => undefined);
+    router.replace("/login");
+    router.refresh();
+  };
+
   return (
     <div className="min-h-screen overflow-auto bg-[#f5f7fb]">
       <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -48,7 +57,7 @@ export default function HomePage() {
             <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 text-white"><Newspaper size={20} /></div>
             <div><p className="font-semibold text-slate-950">VORA Studio</p><p className="text-xs text-slate-500">US Market Content Desk</p></div>
           </div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">Private workspace</span>
+          <button onClick={handleLogout} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900"><LogOut size={16} /> 로그아웃</button>
         </div>
       </header>
       <div className="min-h-full px-4 py-10">
