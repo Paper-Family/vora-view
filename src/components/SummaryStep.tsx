@@ -163,11 +163,16 @@ function wrapCanvasText(
   return lines;
 }
 
-function downloadInstagramSlide(
+async function downloadInstagramSlide(
   slide: GeneratedContent["instagram"]["slides"][number],
   index: number,
   total: number,
 ) {
+  await Promise.allSettled([
+    document.fonts.load('800 66px "Pretendard"'),
+    document.fonts.load('450 39px "Pretendard"'),
+  ]);
+
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1350;
@@ -203,14 +208,14 @@ function downloadInstagramSlide(
   context.fillRect(0, 0, canvas.width, 16);
 
   context.fillStyle = "#e2e8f0";
-  context.font = "700 28px sans-serif";
+  context.font = '700 28px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   context.fillText("VORA", 72, 90);
   context.fillStyle = "#64748b";
-  context.font = "600 22px sans-serif";
+  context.font = '600 22px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   context.fillText("US MARKET INTELLIGENCE", 168, 90);
 
   context.fillStyle = "#64748b";
-  context.font = "600 24px sans-serif";
+  context.font = '600 24px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   context.textAlign = "right";
   context.fillText(`${index + 1} / ${total}`, 1002, 105);
   context.textAlign = "left";
@@ -218,11 +223,11 @@ function downloadInstagramSlide(
   context.fillStyle = "rgba(37, 99, 235, 0.18)";
   context.fillRect(72, 168, 320, 58);
   context.fillStyle = "#60a5fa";
-  context.font = "700 24px sans-serif";
+  context.font = '700 24px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   context.fillText((slide.source || "VORA VIEW").toUpperCase(), 96, 206);
 
   context.fillStyle = "#f8fafc";
-  context.font = "700 66px sans-serif";
+  context.font = '800 66px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   const titleLines = wrapCanvasText(context, slide.title, 936).slice(0, 3);
   titleLines.forEach((line, lineIndex) => {
     context.fillText(line, 72, 330 + lineIndex * 86);
@@ -234,7 +239,7 @@ function downloadInstagramSlide(
 
   const bodyStart = dividerY + 94;
   context.fillStyle = "#cbd5e1";
-  context.font = "400 39px sans-serif";
+  context.font = '450 39px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   const bodyLines = wrapCanvasText(context, slide.body, 936).slice(0, 10);
   bodyLines.forEach((line, lineIndex) => {
     context.fillText(line, 72, bodyStart + lineIndex * 64);
@@ -248,7 +253,7 @@ function downloadInstagramSlide(
   context.stroke();
 
   context.fillStyle = "#94a3b8";
-  context.font = "600 23px sans-serif";
+  context.font = '600 23px "Pretendard", "Apple SD Gothic Neo", sans-serif';
   context.fillText("DATA", 72, 1272);
   context.fillStyle = "#334155";
   context.fillText("·", 145, 1272);
