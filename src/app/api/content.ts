@@ -23,7 +23,13 @@ export type GeneratedContent = {
   blog: {
     title: string;
     introduction: string;
-    sections: Array<{ heading: string; body: string }>;
+    sections: Array<{
+      heading: string;
+      fact: string;
+      interpretation: string;
+      marketImpact: string;
+      watchPoints: string[];
+    }>;
     conclusion: string;
     tags: string[];
   };

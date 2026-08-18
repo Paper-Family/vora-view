@@ -42,7 +42,21 @@ function blogText(content: GeneratedContent) {
     ...content.blog.sections.flatMap((section) => [
       `## ${section.heading}`,
       "",
-      section.body,
+      "### 핵심 사실",
+      "",
+      section.fact,
+      "",
+      "### 쉬운 해석",
+      "",
+      section.interpretation,
+      "",
+      "### 주가와 시장에 미칠 수 있는 영향",
+      "",
+      section.marketImpact,
+      "",
+      "### 앞으로 확인할 것",
+      "",
+      ...section.watchPoints.map((point) => `- ${point}`),
       "",
     ]),
     "## 마무리",
@@ -325,9 +339,33 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
             </div>
             <div className="space-y-10">
               {content.blog.sections.map((section, index) => (
-                <section key={`${section.heading}-${index}`}>
-                  <h3 className="text-xl font-semibold text-slate-900">{section.heading}</h3>
-                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-600">{section.body}</p>
+                <section key={`${section.heading}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200">
+                  <div className="border-b border-slate-200 bg-slate-950 px-6 py-5 text-white">
+                    <p className="text-xs font-semibold tracking-[0.18em] text-blue-300">MARKET NOTE {String(index + 1).padStart(2, "0")}</p>
+                    <h3 className="mt-2 text-xl font-semibold">{section.heading}</h3>
+                  </div>
+                  <div className="space-y-6 p-6">
+                    <div className="border-l-4 border-slate-300 pl-5">
+                      <p className="text-xs font-bold tracking-widest text-slate-500">핵심 사실</p>
+                      <p className="mt-2 whitespace-pre-line leading-8 text-slate-700">{section.fact}</p>
+                    </div>
+                    <div className="rounded-xl bg-blue-50 p-5">
+                      <p className="text-xs font-bold tracking-widest text-blue-700">쉽게 풀어보면</p>
+                      <p className="mt-2 whitespace-pre-line leading-8 text-blue-950">{section.interpretation}</p>
+                    </div>
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+                      <p className="text-xs font-bold tracking-widest text-amber-800">주가와 시장에 미칠 수 있는 영향</p>
+                      <p className="mt-2 whitespace-pre-line leading-8 text-amber-950">{section.marketImpact}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold tracking-widest text-slate-500">앞으로 확인할 것</p>
+                      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {section.watchPoints.map((point, pointIndex) => (
+                          <li key={`${point}-${pointIndex}`} className="rounded-lg bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">✓ {point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </section>
               ))}
               <section className="rounded-2xl bg-blue-50 p-6">
