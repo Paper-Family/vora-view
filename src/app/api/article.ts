@@ -53,6 +53,9 @@ export async function postArticle() {
     cache: "no-store",
   });
 
-  if (!res.ok) throw new Error("POST /api/article failed");
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message ?? "새 기사 수집에 실패했습니다.");
+  }
   return res.json();
 }
