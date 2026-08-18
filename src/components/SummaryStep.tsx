@@ -91,46 +91,94 @@ function downloadInstagramSlide(
   const context = canvas.getContext("2d");
   if (!context) return;
 
-  context.fillStyle = "#f5f7fb";
+  const background = context.createLinearGradient(0, 0, 1080, 1350);
+  background.addColorStop(0, "#07111f");
+  background.addColorStop(0.58, "#0b1729");
+  background.addColorStop(1, "#101f36");
+  context.fillStyle = background;
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = "#2563eb";
-  context.fillRect(0, 0, 22, canvas.height);
 
-  context.fillStyle = "#2563eb";
-  context.font = "700 32px sans-serif";
-  context.fillText(`VORA DAILY BRIEF · ${String(index + 1).padStart(2, "0")}`, 78, 105);
+  context.strokeStyle = "rgba(148, 163, 184, 0.08)";
+  context.lineWidth = 1;
+  for (let x = 0; x <= 1080; x += 90) {
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, 1350);
+    context.stroke();
+  }
+  for (let y = 0; y <= 1350; y += 90) {
+    context.beginPath();
+    context.moveTo(0, y);
+    context.lineTo(1080, y);
+    context.stroke();
+  }
 
-  context.fillStyle = "#94a3b8";
-  context.font = "500 26px sans-serif";
+  const accent = context.createLinearGradient(0, 0, 1080, 0);
+  accent.addColorStop(0, "#2563eb");
+  accent.addColorStop(1, "#22d3ee");
+  context.fillStyle = accent;
+  context.fillRect(0, 0, canvas.width, 16);
+
+  context.fillStyle = "#e2e8f0";
+  context.font = "700 28px sans-serif";
+  context.fillText("VORA", 72, 90);
+  context.fillStyle = "#64748b";
+  context.font = "600 22px sans-serif";
+  context.fillText("US MARKET INTELLIGENCE", 168, 90);
+
+  context.fillStyle = "#64748b";
+  context.font = "600 24px sans-serif";
   context.textAlign = "right";
   context.fillText(`${index + 1} / ${total}`, 1002, 105);
   context.textAlign = "left";
 
-  context.fillStyle = "#0f172a";
-  context.font = "700 64px sans-serif";
-  const titleLines = wrapCanvasText(context, slide.title, 920).slice(0, 3);
+  context.fillStyle = "rgba(37, 99, 235, 0.18)";
+  context.fillRect(72, 168, 320, 58);
+  context.fillStyle = "#60a5fa";
+  context.font = "700 24px sans-serif";
+  context.fillText((slide.source || "VORA VIEW").toUpperCase(), 96, 206);
+
+  context.fillStyle = "#f8fafc";
+  context.font = "700 66px sans-serif";
+  const titleLines = wrapCanvasText(context, slide.title, 936).slice(0, 3);
   titleLines.forEach((line, lineIndex) => {
-    context.fillText(line, 78, 260 + lineIndex * 82);
+    context.fillText(line, 72, 330 + lineIndex * 86);
   });
 
-  const bodyStart = 260 + titleLines.length * 82 + 72;
-  context.fillStyle = "#475569";
-  context.font = "400 40px sans-serif";
-  const bodyLines = wrapCanvasText(context, slide.body, 920).slice(0, 11);
+  const dividerY = 330 + titleLines.length * 86 + 42;
+  context.fillStyle = accent;
+  context.fillRect(72, dividerY, 128, 6);
+
+  const bodyStart = dividerY + 94;
+  context.fillStyle = "#cbd5e1";
+  context.font = "400 39px sans-serif";
+  const bodyLines = wrapCanvasText(context, slide.body, 936).slice(0, 10);
   bodyLines.forEach((line, lineIndex) => {
-    context.fillText(line, 78, bodyStart + lineIndex * 62);
+    context.fillText(line, 72, bodyStart + lineIndex * 64);
   });
 
-  context.strokeStyle = "#dbeafe";
-  context.lineWidth = 3;
+  context.strokeStyle = "rgba(96, 165, 250, 0.35)";
+  context.lineWidth = 2;
   context.beginPath();
-  context.moveTo(78, 1210);
-  context.lineTo(1002, 1210);
+  context.moveTo(72, 1206);
+  context.lineTo(1008, 1206);
   context.stroke();
 
-  context.fillStyle = "#2563eb";
-  context.font = "700 28px sans-serif";
-  context.fillText("미국 시장을 한국어로 쉽게 · VORA", 78, 1275);
+  context.fillStyle = "#94a3b8";
+  context.font = "600 23px sans-serif";
+  context.fillText("DATA", 72, 1272);
+  context.fillStyle = "#334155";
+  context.fillText("·", 145, 1272);
+  context.fillStyle = "#94a3b8";
+  context.fillText("CONTEXT", 176, 1272);
+  context.fillStyle = "#334155";
+  context.fillText("·", 312, 1272);
+  context.fillStyle = "#94a3b8";
+  context.fillText("IMPACT", 343, 1272);
+  context.fillStyle = "#60a5fa";
+  context.textAlign = "right";
+  context.fillText("미국 시장을 한국어로 쉽게", 1008, 1272);
+  context.textAlign = "left";
 
   canvas.toBlob((blob) => {
     if (!blob) return;
@@ -231,9 +279,12 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <div className="space-y-4">
               {content.instagram.slides.map((slide, index) => (
-                <article key={`${slide.order}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <article key={`${slide.order}-${index}`} className="rounded-2xl border border-slate-700 bg-slate-950 p-6 text-white shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="text-xs font-semibold tracking-widest text-blue-600">SLIDE {String(slide.order).padStart(2, "0")}</span>
+                    <div>
+                      <span className="text-xs font-semibold tracking-widest text-blue-400">{slide.source || "VORA VIEW"}</span>
+                      <span className="ml-3 text-xs text-slate-500">SLIDE {String(slide.order).padStart(2, "0")}</span>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
@@ -243,8 +294,8 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
                       <Download className="size-4" /> PNG 저장
                     </Button>
                   </div>
-                  <h3 className="text-xl font-semibold text-slate-950">{slide.title}</h3>
-                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{slide.body}</p>
+                  <h3 className="text-xl font-semibold text-white">{slide.title}</h3>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-300">{slide.body}</p>
                 </article>
               ))}
             </div>

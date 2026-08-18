@@ -1,5 +1,6 @@
 export type InstagramSlide = {
   order: number;
+  source: string;
   title: string;
   body: string;
 };
@@ -45,4 +46,3 @@ export async function generateContent(articleIds: string[]) {
 
   return data as GeneratedContent;
 }
-
