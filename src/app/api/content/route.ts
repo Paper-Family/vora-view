@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-const backendUrl = process.env.VORA_API_URL ?? "https://vora-api.onrender.com";
+const backendUrl =
+  process.env.VORA_API_URL ?? "https://vora-api-jayl.onrender.com";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
@@ -19,4 +20,3 @@ export async function POST(request: Request) {
   const data = await backendResponse.json().catch(() => ({}));
   return NextResponse.json(data, { status: backendResponse.status });
 }
-

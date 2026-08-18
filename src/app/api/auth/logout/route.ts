@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-const backendUrl = process.env.VORA_API_URL ?? "https://vora-api.onrender.com";
+const backendUrl =
+  process.env.VORA_API_URL ?? "https://vora-api-jayl.onrender.com";
 
 export async function GET(request: Request) {
   const cookieHeader = request.headers.get("cookie") ?? "";
