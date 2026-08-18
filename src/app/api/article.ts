@@ -23,11 +23,25 @@ export type PostArticleResponse = {
   articles: Article[];
 };
 
+export const articleCategories = [
+  { value: "all", label: "전체" },
+  { value: "market", label: "증시·경제" },
+  { value: "tech", label: "기술·AI" },
+  { value: "semiconductor", label: "반도체" },
+  { value: "earnings", label: "기업·실적" },
+  { value: "policy", label: "정책·무역" },
+  { value: "rates", label: "금리·채권" },
+  { value: "crypto", label: "가상자산" },
+] as const;
+
+export type ArticleCategory = typeof articleCategories[number]["value"];
+
 type GetArticleParams = {
   page?: number;
   limit?: number;
   sort?: string;
   date?: string;
+  category?: ArticleCategory;
 };
 
 export async function getArticles(params?: GetArticleParams) {
@@ -36,6 +50,7 @@ export async function getArticles(params?: GetArticleParams) {
   if (params?.limit) sp.set("limit", String(params.limit));
   if (params?.sort) sp.set("sort", params.sort);
   if (params?.date) sp.set("date", params.date);
+  if (params?.category && params.category !== "all") sp.set("category", params.category);
 
   const qs = sp.toString();
   const res = await fetch(`/api/article${qs ? `?${qs}` : ""}`, {
@@ -48,9 +63,11 @@ export async function getArticles(params?: GetArticleParams) {
   return res.json();
 }
 
-export async function postArticle() {
+export async function postArticle(category: ArticleCategory) {
   const res = await fetch("/api/article", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ category }),
     credentials: "include",
     cache: "no-store",
   });

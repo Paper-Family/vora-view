@@ -73,6 +73,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const cookie = req.headers.get("cookie") ?? "";
+  const body = await req.json().catch(() => ({}));
 
   const backendRes = await fetch(`${BACKEND}/api/article`, {
     method: "POST",
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
       Cookie: cookie, // ✅
     },
-    body: JSON.stringify({}),
+    body: JSON.stringify(body),
     cache: "no-store",
   });
 

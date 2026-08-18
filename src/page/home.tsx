@@ -28,7 +28,7 @@ export default function HomePage({ user }: HomePageProps) {
 
   const handleSaveArticle = (article: Article) => {
     setSavedArticles((prev) =>
-      prev.length >= 8 || prev.some((savedArticle) =>
+      prev.some((savedArticle) =>
         (savedArticle._id || savedArticle.link) === (article._id || article.link)
       )
         ? prev
@@ -97,9 +97,7 @@ export default function HomePage({ user }: HomePageProps) {
               <span className="text-sm">날짜 선택</span>
             </div>
 
-            <div className="w-8 h-0.5 bg-gray-300"></div>
-
-            <div
+            {isAdmin && <><div className="w-8 h-0.5 bg-gray-300"></div><div
               className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                 currentStep === "articles"
                   ? "bg-blue-600 text-white"
@@ -125,7 +123,7 @@ export default function HomePage({ user }: HomePageProps) {
                 3
               </div>
               <span className="text-sm">요약 및 변환</span>
-            </div>
+            </div></>}
           </div>
         </div>
 

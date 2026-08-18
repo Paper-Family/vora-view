@@ -23,6 +23,7 @@ export function ArticlesStep({
   const articleKey = (article: Article) => article._id || article.link;
   const isSaved = (article: Article) =>
     savedArticles.some((savedArticle) => articleKey(savedArticle) === articleKey(article));
+  const allSelected = articles.length > 0 && articles.every(isSaved);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -30,9 +31,10 @@ export function ArticlesStep({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2>기사 선택</h2>
-            <p className="text-gray-600 text-sm">{isAdmin ? `콘텐츠에 사용할 기사를 선택하세요 · ${savedArticles.length}/8개 선택` : "기사와 시장 인사이트를 읽을 수 있습니다."}</p>
+            <p className="text-gray-600 text-sm">{isAdmin ? `콘텐츠에 사용할 기사를 선택하세요 · ${savedArticles.length}개 선택` : "기사와 시장 인사이트를 읽을 수 있습니다."}</p>
           </div>
           {isAdmin && <div className="flex gap-3">
+            <Button variant="outline" onClick={() => allSelected ? articles.forEach((article) => onUnsaveArticle(articleKey(article))) : articles.filter((article) => !isSaved(article)).forEach(onSaveArticle)}>{allSelected ? "전체 해제" : `전체 선택 (${articles.length})`}</Button>
             <Button
               onClick={onConfirm}
               disabled={savedArticles.length === 0}
@@ -108,7 +110,6 @@ export function ArticlesStep({
                       : onSaveArticle(article)
                   }
                   variant={saved ? "default" : "outline"}
-                  disabled={!saved && savedArticles.length >= 8}
                   className={`flex-shrink-0 gap-2 ${
                     saved ? "bg-blue-600 hover:bg-blue-700 text-white" : ""
                   }`}

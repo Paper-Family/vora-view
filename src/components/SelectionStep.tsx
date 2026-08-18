@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Button } from "@/ui/button";
 import { Label } from "@/ui/label";
 import { useMutation } from "@tanstack/react-query";
-import { getArticles, postArticle } from "@/app/api/article";
-import type { Article, GetArticleResponse } from "@/app/api/article";
+import { articleCategories, getArticles, postArticle } from "@/app/api/article";
+import type { Article, ArticleCategory, GetArticleResponse } from "@/app/api/article";
 
 interface SelectionStepProps {
   isAdmin: boolean;
@@ -27,12 +28,14 @@ export function SelectionStep({
   // console.log("=", selectedDate);
   const isValid = selectedDate;
   const [, setArticleList] = articles;
+  const [category, setCategory] = useState<ArticleCategory>("all");
   const mutation = useMutation({
     mutationFn: (params: {
       sort?: string;
       page?: number;
       limit?: number;
       date?: string;
+      category?: ArticleCategory;
     }) =>
       getArticles(params),
     onSuccess: (data) => {
@@ -47,7 +50,7 @@ export function SelectionStep({
   });
 
   const collectMutation = useMutation({
-    mutationFn: postArticle,
+    mutationFn: () => postArticle(category),
     onSuccess: (data) => {
       onArticlesLoaded?.({ articles: data.articles, left: 0 });
       setArticleList(data.articles);
@@ -74,6 +77,13 @@ export function SelectionStep({
               발행할 날짜의 수집 기사를 불러오세요
             </p>
           </div>
+
+          <div>
+            <Label htmlFor="category">카테고리</Label>
+            <select id="category" value={category} onChange={(event) => setCategory(event.target.value as ArticleCategory)} className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              {articleCategories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -96,6 +106,7 @@ export function SelectionStep({
                 sort: "-date",
                 limit: 30,
                 date: selectedDate,
+                category,
               });
             }}
             disabled={!isValid || isBusy}
