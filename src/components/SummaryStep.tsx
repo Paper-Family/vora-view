@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   Check,
@@ -33,10 +33,9 @@ function instagramText(content: GeneratedContent) {
   ].join("\n");
 }
 
-function blogText(content: GeneratedContent) {
+function blogText(content: GeneratedContent, includeTitle = true) {
   return [
-    `# ${content.blog.title}`,
-    "",
+    ...(includeTitle ? [`# ${content.blog.title}`, ""] : []),
     content.blog.introduction,
     "",
     ...content.blog.sections.flatMap((section) => [
@@ -124,7 +123,7 @@ function blogHtml(content: GeneratedContent) {
   return `<article style="max-width:760px;margin:0 auto;font-family:Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#0f172a;">
     <div style="padding-bottom:28px;border-bottom:1px solid #e2e8f0;">
       <div style="font-size:13px;font-weight:700;color:#2563eb;">VORA MARKET LETTER</div>
-      <h1 style="margin:12px 0 18px;font-size:34px;line-height:1.35;">${escapeHtml(content.blog.title)}</h1>
+      ${blogSpacer}
       ${paragraphs(content.blog.introduction)}
     </div>
     ${sections}
@@ -287,7 +286,7 @@ async function downloadInstagramSlide(
 
 export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
   const [activeFormat, setActiveFormat] = useState("instagram");
-  const [copied, setCopied] = useState(false);
+  const [copiedTarget, setCopiedTarget] = useState<"instagram" | "blog-title" | "blog-body" | null>(null);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const mutation = useMutation({
@@ -295,23 +294,21 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
   });
 
   const content = mutation.data;
-  const copyValue = useMemo(() => {
-    if (!content) return "";
-    return activeFormat === "instagram" ? instagramText(content) : blogText(content);
-  }, [activeFormat, content]);
-
-  const handleCopy = async () => {
-    if (activeFormat === "blog" && content && typeof ClipboardItem !== "undefined") {
+  const handleCopy = async (target: "instagram" | "blog-title" | "blog-body") => {
+    if (!content) return;
+    if (target === "blog-title") {
+      await navigator.clipboard.writeText(content.blog.title);
+    } else if (target === "blog-body" && typeof ClipboardItem !== "undefined") {
       const item = new ClipboardItem({
         "text/html": new Blob([blogHtml(content)], { type: "text/html" }),
-        "text/plain": new Blob([blogText(content)], { type: "text/plain" }),
+        "text/plain": new Blob([blogText(content, false)], { type: "text/plain" }),
       });
       await navigator.clipboard.write([item]);
     } else {
-      await navigator.clipboard.writeText(copyValue);
+      await navigator.clipboard.writeText(target === "blog-body" ? blogText(content, false) : instagramText(content));
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    setCopiedTarget(target);
+    window.setTimeout(() => setCopiedTarget(null), 1800);
   };
 
   const handleDownloadAll = async () => {
@@ -379,9 +376,23 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
           <Button variant="outline" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
             <RefreshCw className={mutation.isPending ? "animate-spin" : ""} /> 다시 생성
           </Button>
-          <Button onClick={handleCopy} className="bg-blue-600 text-white hover:bg-blue-700">
-            {copied ? <Check /> : <Copy />} {copied ? "복사 완료" : activeFormat === "blog" ? "네이버 블로그 서식 복사" : "원고 복사"}
-          </Button>
+          {activeFormat === "blog" ? (
+            <>
+              <Button variant="outline" onClick={() => handleCopy("blog-title")}>
+                {copiedTarget === "blog-title" ? <Check /> : <Copy />}
+                {copiedTarget === "blog-title" ? "제목 복사 완료" : "제목 복사"}
+              </Button>
+              <Button onClick={() => handleCopy("blog-body")} className="bg-blue-600 text-white hover:bg-blue-700">
+                {copiedTarget === "blog-body" ? <Check /> : <Copy />}
+                {copiedTarget === "blog-body" ? "본문 복사 완료" : "본문 서식 복사"}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => handleCopy("instagram")} className="bg-blue-600 text-white hover:bg-blue-700">
+              {copiedTarget === "instagram" ? <Check /> : <Copy />}
+              {copiedTarget === "instagram" ? "복사 완료" : "원고 복사"}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -433,10 +444,10 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
                 {content.instagram.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" ")}
               </p>
               <Button
-                onClick={handleCopy}
+                onClick={() => handleCopy("instagram")}
                 className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
               >
-                {copied ? <Check /> : <Copy />} {copied ? "복사 완료" : "캡션 복사"}
+                {copiedTarget === "instagram" ? <Check /> : <Copy />} {copiedTarget === "instagram" ? "복사 완료" : "캡션 복사"}
               </Button>
             </aside>
           </div>
