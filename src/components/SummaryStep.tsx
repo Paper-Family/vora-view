@@ -91,7 +91,7 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
           <div className="p-8">
             <div className="mb-8 grid gap-3 sm:grid-cols-2">
               {savedArticles.map((article, index) => (
-                <div key={article._id} className="rounded-xl border border-slate-200 p-4">
+                <div key={article._id || article.link} className="rounded-xl border border-slate-200 p-4">
                   <div className="mb-2 text-xs font-semibold text-blue-600">SOURCE {String(index + 1).padStart(2, "0")}</div>
                   <p className="line-clamp-2 text-sm font-medium text-slate-900">{article.title}</p>
                   <p className="mt-2 text-xs text-slate-500">{article.source} · {article.date}</p>
@@ -143,8 +143,8 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
         <TabsContent value="instagram">
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <div className="space-y-4">
-              {content.instagram.slides.map((slide) => (
-                <article key={slide.order} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {content.instagram.slides.map((slide, index) => (
+                <article key={`${slide.order}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
                     <span className="text-xs font-semibold tracking-widest text-blue-600">SLIDE {String(slide.order).padStart(2, "0")}</span>
                     <span className="text-xs text-slate-400">VORA DAILY BRIEF</span>
@@ -173,8 +173,8 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
               <p className="mt-5 leading-8 text-slate-600">{content.blog.introduction}</p>
             </div>
             <div className="space-y-10">
-              {content.blog.sections.map((section) => (
-                <section key={section.heading}>
+              {content.blog.sections.map((section, index) => (
+                <section key={`${section.heading}-${index}`}>
                   <h3 className="text-xl font-semibold text-slate-900">{section.heading}</h3>
                   <p className="mt-3 whitespace-pre-line leading-8 text-slate-600">{section.body}</p>
                 </section>

@@ -21,11 +21,19 @@ export default function HomePage() {
   const handleSubmitSelection = () => setCurrentStep("articles");
 
   const handleSaveArticle = (article: Article) => {
-    setSavedArticles((prev) => [...prev, article]);
+    setSavedArticles((prev) =>
+      prev.some((savedArticle) =>
+        (savedArticle._id || savedArticle.link) === (article._id || article.link)
+      )
+        ? prev
+        : [...prev, article]
+    );
   };
 
   const handleUnsaveArticle = (articleId: string) => {
-    setSavedArticles((prev) => prev.filter((a) => a._id !== articleId));
+    setSavedArticles((prev) =>
+      prev.filter((article) => (article._id || article.link) !== articleId)
+    );
   };
 
   const handleConfirm = () => {

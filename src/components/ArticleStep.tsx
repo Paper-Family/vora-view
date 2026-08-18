@@ -18,8 +18,9 @@ export function ArticlesStep({
   onUnsaveArticle,
   onConfirm,
 }: ArticlesStepProps) {
-  const isSaved = (articleId: string) =>
-    savedArticles.some((a) => a._id === articleId);
+  const articleKey = (article: Article) => article._id || article.link;
+  const isSaved = (article: Article) =>
+    savedArticles.some((savedArticle) => articleKey(savedArticle) === articleKey(article));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -46,11 +47,11 @@ export function ArticlesStep({
 
       <div className="space-y-4">
         {articles.map((article) => {
-          const saved = isSaved(article._id);
+          const saved = isSaved(article);
 
           return (
             <div
-              key={article._id}
+              key={articleKey(article)}
               className={`bg-white rounded-xl shadow-sm border-2 p-6 transition-all ${
                 saved
                   ? "border-blue-500 bg-blue-50/30"
@@ -81,8 +82,8 @@ export function ArticlesStep({
                   )}
 
                   <div className="mb-4 flex flex-wrap gap-1.5">
-                    {article.keywords?.slice(0, 5).map((keyword) => (
-                      <span key={keyword} className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">
+                    {article.keywords?.slice(0, 5).map((keyword, index) => (
+                      <span key={`${keyword}-${index}`} className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">
                         #{keyword}
                       </span>
                     ))}
@@ -102,7 +103,7 @@ export function ArticlesStep({
                 <Button
                   onClick={() =>
                     saved
-                      ? onUnsaveArticle(article._id)
+                      ? onUnsaveArticle(articleKey(article))
                       : onSaveArticle(article)
                   }
                   variant={saved ? "default" : "outline"}
