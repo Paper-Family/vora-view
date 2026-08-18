@@ -71,6 +71,65 @@ function blogText(content: GeneratedContent) {
   ].join("\n");
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function paragraphs(value: string) {
+  return value
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p style="margin:0 0 18px;line-height:1.85;color:#334155;">${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
+    .join("");
+}
+
+function blogHtml(content: GeneratedContent) {
+  const sections = content.blog.sections.map((section, index) => `
+    <section style="margin:40px 0;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
+      <div style="padding:22px 26px;background:#0f172a;color:#ffffff;">
+        <div style="margin-bottom:8px;font-size:12px;font-weight:700;letter-spacing:2px;color:#93c5fd;">MARKET NOTE ${String(index + 1).padStart(2, "0")}</div>
+        <h2 style="margin:0;font-size:24px;line-height:1.45;">${escapeHtml(section.heading)}</h2>
+      </div>
+      <div style="padding:26px;">
+        <h3 style="margin:0 0 12px;font-size:15px;color:#475569;">핵심 사실</h3>
+        <div style="margin-bottom:24px;padding-left:18px;border-left:4px solid #94a3b8;">${paragraphs(section.fact)}</div>
+        <div style="margin-bottom:24px;padding:20px;border-radius:12px;background:#eff6ff;">
+          <h3 style="margin:0 0 12px;font-size:15px;color:#1d4ed8;">쉽게 풀어보면</h3>
+          ${paragraphs(section.interpretation)}
+        </div>
+        <div style="margin-bottom:24px;padding:20px;border:1px solid #fde68a;border-radius:12px;background:#fffbeb;">
+          <h3 style="margin:0 0 12px;font-size:15px;color:#92400e;">주가와 시장에 미칠 수 있는 영향</h3>
+          ${paragraphs(section.marketImpact)}
+        </div>
+        <h3 style="margin:0 0 12px;font-size:15px;color:#475569;">앞으로 확인할 것</h3>
+        <ul style="margin:0;padding-left:22px;line-height:1.9;color:#334155;">${section.watchPoints.map((point) => `<li style="margin-bottom:6px;">${escapeHtml(point)}</li>`).join("")}</ul>
+      </div>
+    </section>`).join("");
+
+  const sources = content.sources.map((source) => `<li style="margin-bottom:8px;"><a href="${escapeHtml(source.link)}">${escapeHtml(source.source)} · ${escapeHtml(source.title)}</a></li>`).join("");
+  const tags = content.blog.tags.map((tag) => `#${escapeHtml(tag.replace(/^#/, ""))}`).join(" ");
+
+  return `<article style="max-width:760px;margin:0 auto;font-family:Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#0f172a;">
+    <div style="padding-bottom:28px;border-bottom:1px solid #e2e8f0;">
+      <div style="font-size:13px;font-weight:700;color:#2563eb;">VORA MARKET LETTER</div>
+      <h1 style="margin:12px 0 18px;font-size:34px;line-height:1.35;">${escapeHtml(content.blog.title)}</h1>
+      ${paragraphs(content.blog.introduction)}
+    </div>
+    ${sections}
+    <div style="margin:36px 0;padding:24px;border-radius:14px;background:#eff6ff;">
+      <h2 style="margin:0 0 12px;font-size:20px;color:#172554;">마무리</h2>
+      ${paragraphs(content.blog.conclusion)}
+    </div>
+    <h2 style="font-size:20px;">출처</h2><ul style="padding-left:22px;line-height:1.8;">${sources}</ul>
+    <p style="margin-top:28px;line-height:1.8;color:#2563eb;">${tags}</p>
+    <p style="margin-top:28px;padding-top:18px;border-top:1px solid #e2e8f0;font-size:12px;line-height:1.7;color:#94a3b8;">본 콘텐츠는 정보 제공을 목적으로 하며 특정 금융상품의 매수 또는 매도를 권유하지 않습니다.</p>
+  </article>`;
+}
+
 function wrapCanvasText(
   context: CanvasRenderingContext2D,
   text: string,
@@ -220,7 +279,15 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
   }, [activeFormat, content]);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(copyValue);
+    if (activeFormat === "blog" && content && typeof ClipboardItem !== "undefined") {
+      const item = new ClipboardItem({
+        "text/html": new Blob([blogHtml(content)], { type: "text/html" }),
+        "text/plain": new Blob([blogText(content)], { type: "text/plain" }),
+      });
+      await navigator.clipboard.write([item]);
+    } else {
+      await navigator.clipboard.writeText(copyValue);
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   };
@@ -278,7 +345,7 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
             <RefreshCw className={mutation.isPending ? "animate-spin" : ""} /> 다시 생성
           </Button>
           <Button onClick={handleCopy} className="bg-blue-600 text-white hover:bg-blue-700">
-            {copied ? <Check /> : <Copy />} {copied ? "복사 완료" : "원고 복사"}
+            {copied ? <Check /> : <Copy />} {copied ? "복사 완료" : activeFormat === "blog" ? "네이버 블로그 서식 복사" : "원고 복사"}
           </Button>
         </div>
       </div>
