@@ -16,7 +16,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { generateContent, updatePublication, type GeneratedContent } from "@/app/api/content";
+import { ContentGenerationError, generateContent, updatePublication, type GeneratedContent } from "@/app/api/content";
 import type { Article } from "@/app/api/article";
 
 interface SummaryStepProps {
@@ -335,9 +335,14 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
   const [copiedTarget, setCopiedTarget] = useState<"instagram" | "blog-title" | "blog-body" | "threads" | null>(null);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
   const [publishedChannels, setPublishedChannels] = useState<Set<string>>(new Set());
+  const [deadArticleIds, setDeadArticleIds] = useState<string[]>([]);
 
   const mutation = useMutation({
-    mutationFn: () => generateContent(savedArticles.map((article) => article._id)),
+    mutationFn: (articleIds?: string[]) => generateContent(articleIds ?? savedArticles.map((article) => article._id)),
+    onError: (error) => {
+      setDeadArticleIds(error instanceof ContentGenerationError ? error.deadArticleIds : []);
+    },
+    onSuccess: () => setDeadArticleIds([]),
   });
 
   const content = mutation.data;
@@ -409,13 +414,15 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
                 </div>
               ))}
             </div>
-            {mutation.isError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                {mutation.error.message}
-              </div>
-            )}
+            {mutation.isError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-semibold">{mutation.error.message}</p>
+              {deadArticleIds.length > 0 && <div className="mt-3 space-y-2">
+                {savedArticles.filter((article) => deadArticleIds.includes(article._id)).map((article) => <div key={article._id} className="rounded-lg border border-red-200 bg-white px-3 py-2"><p className="font-medium text-red-900">{article.title}</p><p className="mt-1 text-xs text-red-600">{article.source} · {article.date} · 원문 접속 불가</p></div>)}
+                <Button type="button" onClick={() => mutation.mutate(savedArticles.filter((article) => !deadArticleIds.includes(article._id)).map((article) => article._id))} disabled={mutation.isPending || deadArticleIds.length >= savedArticles.length} className="mt-2 w-full bg-red-600 text-white hover:bg-red-700">접속 불가 기사 제외하고 다시 생성</Button>
+              </div>}
+            </div>}
             <Button
-              onClick={() => mutation.mutate()}
+              onClick={() => mutation.mutate(undefined)}
               disabled={mutation.isPending}
               className="h-12 w-full bg-blue-600 text-white hover:bg-blue-700"
             >
@@ -436,7 +443,7 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
           <ArrowLeft size={16} /> 기사 다시 선택하기
         </button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          <Button variant="outline" onClick={() => mutation.mutate(undefined)} disabled={mutation.isPending}>
             <RefreshCw className={mutation.isPending ? "animate-spin" : ""} /> 다시 생성
           </Button>
           {activeFormat === "blog" ? (

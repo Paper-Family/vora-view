@@ -57,6 +57,16 @@ export type ContentHistoryItem = Pick<GeneratedContent, "_id" | "createdAt" | "p
   threads?: { headline?: string };
 };
 
+export class ContentGenerationError extends Error {
+  deadArticleIds: string[];
+
+  constructor(message: string, deadArticleIds: string[] = []) {
+    super(message);
+    this.name = "ContentGenerationError";
+    this.deadArticleIds = deadArticleIds;
+  }
+}
+
 export async function getContentHistory() {
   const response = await fetch("/api/content", { credentials: "include", cache: "no-store" });
   const data = await response.json().catch(() => ({}));
@@ -75,7 +85,10 @@ export async function generateContent(articleIds: string[]) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.message ?? "콘텐츠 생성에 실패했습니다.");
+    throw new ContentGenerationError(
+      data.message ?? "콘텐츠 생성에 실패했습니다.",
+      Array.isArray(data.deadArticleIds) ? data.deadArticleIds.map(String) : [],
+    );
   }
 
   return data as GeneratedContent;
