@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Check,
   Copy,
+  Download,
   ExternalLink,
   FileText,
   Instagram,
@@ -54,6 +55,92 @@ function blogText(content: GeneratedContent) {
     "",
     content.blog.tags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" "),
   ].join("\n");
+}
+
+function wrapCanvasText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+) {
+  const lines: string[] = [];
+  for (const paragraph of text.split("\n")) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    let line = "";
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (context.measureText(candidate).width <= maxWidth) {
+        line = candidate;
+      } else {
+        if (line) lines.push(line);
+        line = word;
+      }
+    }
+    if (line) lines.push(line);
+  }
+  return lines;
+}
+
+function downloadInstagramSlide(
+  slide: GeneratedContent["instagram"]["slides"][number],
+  index: number,
+  total: number,
+) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1350;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  context.fillStyle = "#f5f7fb";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#2563eb";
+  context.fillRect(0, 0, 22, canvas.height);
+
+  context.fillStyle = "#2563eb";
+  context.font = "700 32px sans-serif";
+  context.fillText(`VORA DAILY BRIEF · ${String(index + 1).padStart(2, "0")}`, 78, 105);
+
+  context.fillStyle = "#94a3b8";
+  context.font = "500 26px sans-serif";
+  context.textAlign = "right";
+  context.fillText(`${index + 1} / ${total}`, 1002, 105);
+  context.textAlign = "left";
+
+  context.fillStyle = "#0f172a";
+  context.font = "700 64px sans-serif";
+  const titleLines = wrapCanvasText(context, slide.title, 920).slice(0, 3);
+  titleLines.forEach((line, lineIndex) => {
+    context.fillText(line, 78, 260 + lineIndex * 82);
+  });
+
+  const bodyStart = 260 + titleLines.length * 82 + 72;
+  context.fillStyle = "#475569";
+  context.font = "400 40px sans-serif";
+  const bodyLines = wrapCanvasText(context, slide.body, 920).slice(0, 11);
+  bodyLines.forEach((line, lineIndex) => {
+    context.fillText(line, 78, bodyStart + lineIndex * 62);
+  });
+
+  context.strokeStyle = "#dbeafe";
+  context.lineWidth = 3;
+  context.beginPath();
+  context.moveTo(78, 1210);
+  context.lineTo(1002, 1210);
+  context.stroke();
+
+  context.fillStyle = "#2563eb";
+  context.font = "700 28px sans-serif";
+  context.fillText("미국 시장을 한국어로 쉽게 · VORA", 78, 1275);
+
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `vora-instagram-${String(index + 1).padStart(2, "0")}.png`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, "image/png");
 }
 
 export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
@@ -147,7 +234,14 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
                 <article key={`${slide.order}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
                     <span className="text-xs font-semibold tracking-widest text-blue-600">SLIDE {String(slide.order).padStart(2, "0")}</span>
-                    <span className="text-xs text-slate-400">VORA DAILY BRIEF</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadInstagramSlide(slide, index, content.instagram.slides.length)}
+                      className="gap-2"
+                    >
+                      <Download className="size-4" /> PNG 저장
+                    </Button>
                   </div>
                   <h3 className="text-xl font-semibold text-slate-950">{slide.title}</h3>
                   <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{slide.body}</p>
@@ -161,6 +255,12 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
               <p className="mt-5 text-sm leading-7 text-blue-300">
                 {content.instagram.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" ")}
               </p>
+              <Button
+                onClick={handleCopy}
+                className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
+              >
+                {copied ? <Check /> : <Copy />} {copied ? "복사 완료" : "캡션 복사"}
+              </Button>
             </aside>
           </div>
         </TabsContent>
