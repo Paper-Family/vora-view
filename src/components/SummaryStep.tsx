@@ -268,20 +268,27 @@ async function downloadInstagramSlide(
   context.fillText("미국 시장을 한국어로 쉽게", 1008, 1272);
   context.textAlign = "left";
 
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `vora-instagram-${String(index + 1).padStart(2, "0")}.png`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }, "image/png");
+  await new Promise<void>((resolve) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        resolve();
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `vora-instagram-${String(index + 1).padStart(2, "0")}.png`;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      resolve();
+    }, "image/png");
+  });
 }
 
 export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
   const [activeFormat, setActiveFormat] = useState("instagram");
   const [copied, setCopied] = useState(false);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () => generateContent(savedArticles.map((article) => article._id)),
@@ -305,6 +312,19 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
     }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  const handleDownloadAll = async () => {
+    if (!content || isDownloadingAll) return;
+    setIsDownloadingAll(true);
+    try {
+      for (const [index, slide] of content.instagram.slides.entries()) {
+        await downloadInstagramSlide(slide, index, content.instagram.slides.length);
+        await new Promise((resolve) => window.setTimeout(resolve, 180));
+      }
+    } finally {
+      setIsDownloadingAll(false);
+    }
   };
 
   if (!content) {
@@ -372,6 +392,16 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
         </TabsList>
 
         <TabsContent value="instagram">
+          <div className="mb-4 flex justify-end">
+            <Button
+              onClick={handleDownloadAll}
+              disabled={isDownloadingAll}
+              className="bg-slate-950 text-white hover:bg-slate-800"
+            >
+              {isDownloadingAll ? <LoaderCircle className="animate-spin" /> : <Download />}
+              {isDownloadingAll ? "PNG 저장 중..." : `PNG 모두 저장 (${content.instagram.slides.length})`}
+            </Button>
+          </div>
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <div className="space-y-4">
               {content.instagram.slides.map((slide, index) => (
