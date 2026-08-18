@@ -162,6 +162,15 @@ function wrapCanvasText(
   return lines;
 }
 
+function loadCanvasImage(source: string) {
+  return new Promise<HTMLImageElement | null>((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = source;
+  });
+}
+
 async function downloadInstagramSlide(
   slide: GeneratedContent["instagram"]["slides"][number],
   index: number,
@@ -171,6 +180,7 @@ async function downloadInstagramSlide(
     document.fonts.load('800 66px "Pretendard"'),
     document.fonts.load('450 39px "Pretendard"'),
   ]);
+  const logo = await loadCanvasImage("/vora-profile-logo.png");
 
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
@@ -206,12 +216,21 @@ async function downloadInstagramSlide(
   context.fillStyle = accent;
   context.fillRect(0, 0, canvas.width, 16);
 
+  if (logo) {
+    context.save();
+    context.beginPath();
+    context.arc(102, 78, 34, 0, Math.PI * 2);
+    context.clip();
+    context.drawImage(logo, 68, 44, 68, 68);
+    context.restore();
+  }
+
   context.fillStyle = "#e2e8f0";
   context.font = '700 28px "Pretendard", "Apple SD Gothic Neo", sans-serif';
-  context.fillText("VORA", 72, 90);
+  context.fillText("VORA", 156, 90);
   context.fillStyle = "#64748b";
   context.font = '600 22px "Pretendard", "Apple SD Gothic Neo", sans-serif';
-  context.fillText("US MARKET INTELLIGENCE", 168, 90);
+  context.fillText("US MARKET INTELLIGENCE", 252, 90);
 
   context.fillStyle = "#64748b";
   context.font = '600 24px "Pretendard", "Apple SD Gothic Neo", sans-serif';
