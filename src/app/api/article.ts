@@ -6,6 +6,8 @@ export type Article = {
   hooking: string;
   keywords: string[];
   link: string;
+  linkStatus?: "verified" | "unverified" | "dead";
+  linkVerifiedAt?: string;
   sectors: string[];
   source: string;
   summary: string;

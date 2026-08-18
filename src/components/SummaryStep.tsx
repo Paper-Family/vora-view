@@ -11,11 +11,12 @@ import {
   Instagram,
   LoaderCircle,
   RefreshCw,
+  Send,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { generateContent, type GeneratedContent } from "@/app/api/content";
+import { generateContent, updatePublication, type GeneratedContent } from "@/app/api/content";
 import type { Article } from "@/app/api/article";
 
 interface SummaryStepProps {
@@ -30,6 +31,17 @@ function instagramText(content: GeneratedContent) {
     content.instagram.caption,
     "",
     content.instagram.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" "),
+  ].join("\n");
+}
+
+function threadsText(content: GeneratedContent) {
+  return [
+    content.threads.headline,
+    "",
+    ...content.threads.posts.flatMap((post, index) => [`${index + 1}/${content.threads.posts.length} ${post}`, ""]),
+    content.threads.closing,
+    "",
+    content.threads.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" "),
   ].join("\n");
 }
 
@@ -258,10 +270,25 @@ async function downloadInstagramSlide(
   const bodyStart = dividerY + 94;
   context.fillStyle = "#cbd5e1";
   context.font = '450 39px "Pretendard", "Apple SD Gothic Neo", sans-serif';
-  const bodyLines = wrapCanvasText(context, slide.body, 936).slice(0, 10);
-  bodyLines.forEach((line, lineIndex) => {
-    context.fillText(line, 72, bodyStart + lineIndex * 64);
-  });
+  if (slide.kind === "numbers" && slide.metrics?.length) {
+    slide.metrics.slice(0, 3).forEach((metric, metricIndex) => {
+      const y = bodyStart + metricIndex * 190;
+      context.fillStyle = "rgba(30, 64, 175, 0.22)";
+      context.fillRect(72, y - 48, 936, 156);
+      context.fillStyle = "#22d3ee";
+      context.font = '800 52px "Pretendard", "Apple SD Gothic Neo", sans-serif';
+      context.fillText(metric.value, 100, y + 18);
+      context.fillStyle = "#f8fafc";
+      context.font = '700 28px "Pretendard", "Apple SD Gothic Neo", sans-serif';
+      context.fillText(metric.label, 390, y - 2);
+      context.fillStyle = "#94a3b8";
+      context.font = '450 23px "Pretendard", "Apple SD Gothic Neo", sans-serif';
+      wrapCanvasText(context, metric.context, 570).slice(0, 2).forEach((line, lineIndex) => context.fillText(line, 390, y + 38 + lineIndex * 32));
+    });
+  } else {
+    const bodyLines = wrapCanvasText(context, slide.body, 936).slice(0, 10);
+    bodyLines.forEach((line, lineIndex) => context.fillText(line, 72, bodyStart + lineIndex * 64));
+  }
 
   context.strokeStyle = "rgba(96, 165, 250, 0.35)";
   context.lineWidth = 2;
@@ -305,15 +332,16 @@ async function downloadInstagramSlide(
 
 export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
   const [activeFormat, setActiveFormat] = useState("instagram");
-  const [copiedTarget, setCopiedTarget] = useState<"instagram" | "blog-title" | "blog-body" | null>(null);
+  const [copiedTarget, setCopiedTarget] = useState<"instagram" | "blog-title" | "blog-body" | "threads" | null>(null);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  const [publishedChannels, setPublishedChannels] = useState<Set<string>>(new Set());
 
   const mutation = useMutation({
     mutationFn: () => generateContent(savedArticles.map((article) => article._id)),
   });
 
   const content = mutation.data;
-  const handleCopy = async (target: "instagram" | "blog-title" | "blog-body") => {
+  const handleCopy = async (target: "instagram" | "blog-title" | "blog-body" | "threads") => {
     if (!content) return;
     if (target === "blog-title") {
       await navigator.clipboard.writeText(content.blog.title);
@@ -324,10 +352,26 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
       });
       await navigator.clipboard.write([item]);
     } else {
-      await navigator.clipboard.writeText(target === "blog-body" ? blogText(content, false) : instagramText(content));
+      await navigator.clipboard.writeText(target === "blog-body" ? blogText(content, false) : target === "threads" ? threadsText(content) : instagramText(content));
     }
     setCopiedTarget(target);
     window.setTimeout(() => setCopiedTarget(null), 1800);
+  };
+
+  const handlePublished = async (channel: "instagram" | "blog" | "threads") => {
+    if (!content?._id) return;
+    const nextPublished = !publishedChannels.has(channel);
+    try {
+      await updatePublication(content._id, channel, nextPublished);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "발행 상태 저장에 실패했습니다.");
+      return;
+    }
+    setPublishedChannels((current) => {
+      const next = new Set(current);
+      if (nextPublished) next.add(channel); else next.delete(channel);
+      return next;
+    });
   };
 
   const handleDownloadAll = async () => {
@@ -376,7 +420,7 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
               className="h-12 w-full bg-blue-600 text-white hover:bg-blue-700"
             >
               {mutation.isPending ? <LoaderCircle className="animate-spin" /> : <FileText />}
-              {mutation.isPending ? "뉴스를 분석해 원고를 작성하고 있습니다..." : "인스타그램 · 블로그 원고 생성"}
+              {mutation.isPending ? "뉴스를 분석해 원고를 작성하고 있습니다..." : "Instagram · Blog · Threads 원고 생성"}
             </Button>
             <p className="mt-3 text-center text-xs text-slate-400">생성된 내용은 원문과 수치를 확인한 뒤 발행해 주세요.</p>
           </div>
@@ -406,6 +450,11 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
                 {copiedTarget === "blog-body" ? "본문 복사 완료" : "본문 서식 복사"}
               </Button>
             </>
+          ) : activeFormat === "threads" ? (
+            <Button onClick={() => handleCopy("threads")} className="bg-blue-600 text-white hover:bg-blue-700">
+              {copiedTarget === "threads" ? <Check /> : <Copy />}
+              {copiedTarget === "threads" ? "복사 완료" : "Threads 원고 복사"}
+            </Button>
           ) : (
             <Button onClick={() => handleCopy("instagram")} className="bg-blue-600 text-white hover:bg-blue-700">
               {copiedTarget === "instagram" ? <Check /> : <Copy />}
@@ -416,9 +465,10 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
       </div>
 
       <Tabs value={activeFormat} onValueChange={setActiveFormat}>
-        <TabsList className="mb-5 grid h-12 w-full grid-cols-2 bg-slate-200 p-1 sm:w-96">
+        <TabsList className="mb-5 grid h-12 w-full grid-cols-3 bg-slate-200 p-1 sm:w-[560px]">
           <TabsTrigger value="instagram" className="gap-2"><Instagram /> Instagram</TabsTrigger>
           <TabsTrigger value="blog" className="gap-2"><FileText /> Blog</TabsTrigger>
+          <TabsTrigger value="threads" className="gap-2"><Send /> Threads</TabsTrigger>
         </TabsList>
 
         <TabsContent value="instagram">
@@ -451,7 +501,7 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
                     </Button>
                   </div>
                   <h3 className="text-xl font-semibold text-white">{slide.title}</h3>
-                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-300">{slide.body}</p>
+                  {slide.kind === "numbers" && slide.metrics?.length ? <div className="mt-4 grid gap-3 sm:grid-cols-3">{slide.metrics.map((metric, metricIndex) => <div key={`${metric.label}-${metricIndex}`} className="rounded-xl bg-blue-950 p-4"><p className="text-2xl font-bold text-cyan-300">{metric.value}</p><p className="mt-1 text-sm font-semibold text-white">{metric.label}</p><p className="mt-2 text-xs leading-5 text-slate-400">{metric.context}</p></div>)}</div> : <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-300">{slide.body}</p>}
                 </article>
               ))}
             </div>
@@ -517,7 +567,33 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
             </div>
           </article>
         </TabsContent>
+
+        <TabsContent value="threads">
+          <article className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-6">
+              <div><p className="text-xs font-bold tracking-widest text-blue-600">THREADS DRAFT</p><h2 className="mt-2 text-2xl font-semibold text-slate-950">{content.threads.headline}</h2></div>
+              <Button onClick={() => handleCopy("threads")} className="bg-slate-950 text-white hover:bg-slate-800">{copiedTarget === "threads" ? <Check /> : <Copy />} {copiedTarget === "threads" ? "복사 완료" : "Threads 원고 복사"}</Button>
+            </div>
+            <div className="mt-6 space-y-4">
+              {content.threads.posts.map((post, index) => <div key={`${index}-${post}`} className="rounded-2xl border border-slate-200 p-5"><p className="mb-2 text-xs font-semibold text-blue-600">{index + 1}/{content.threads.posts.length}</p><p className="whitespace-pre-line leading-7 text-slate-700">{post}</p></div>)}
+            </div>
+            <p className="mt-6 rounded-2xl bg-blue-50 p-5 leading-7 text-blue-950">{content.threads.closing}</p>
+            <p className="mt-4 text-sm text-blue-600">{content.threads.hashtags.map((tag) => `#${tag.replace(/^#/, "")}`).join(" ")}</p>
+          </article>
+        </TabsContent>
       </Tabs>
+
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 className="font-semibold text-slate-900">발행 상태</h3>
+        <p className="mt-1 text-sm text-slate-500">발행을 마친 채널을 기록해 중복 게시를 방지하세요.</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {([['instagram', 'Instagram'], ['blog', 'Blog'], ['threads', 'Threads']] as const).map(([channel, label]) => (
+            <Button key={channel} variant={publishedChannels.has(channel) ? "default" : "outline"} onClick={() => handlePublished(channel)}>
+              {publishedChannels.has(channel) && <Check />} {label} {publishedChannels.has(channel) ? "발행 완료" : "발행 완료로 표시"}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
         <h3 className="font-semibold text-slate-900">사용한 출처</h3>

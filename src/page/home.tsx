@@ -8,15 +8,21 @@ import { ArticlesStep } from "@/components/ArticleStep";
 import { SummaryStep } from "@/components/SummaryStep";
 import type { Article } from "@/app/api/article";
 import { getLogout } from "@/app/api/login";
+import { PublishingHistory } from "@/components/PublishingHistory";
 
 type Step = "selection" | "articles" | "summary";
 
-export default function HomePage() {
+interface HomePageProps {
+  user: { email: string; name: string; role: "admin" | "reader" };
+}
+
+export default function HomePage({ user }: HomePageProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>("selection");
   const [selectedDate, setSelectedDate] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
+  const isAdmin = user.role === "admin";
 
   const handleSubmitSelection = () => setCurrentStep("articles");
 
@@ -63,7 +69,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 text-white"><Newspaper size={20} /></div>
-            <div><p className="font-semibold text-slate-950">VORA Studio</p><p className="text-xs text-slate-500">US Market Content Desk</p></div>
+            <div><p className="font-semibold text-slate-950">VORA Studio</p><p className="text-xs text-slate-500">{isAdmin ? "Administrator Content Desk" : "US Market News Reader"}</p></div>
           </div>
           <button onClick={handleLogout} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900"><LogOut size={16} /> 로그아웃</button>
         </div>
@@ -72,7 +78,7 @@ export default function HomePage() {
         <div className="mx-auto mb-10 max-w-3xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700"><Sparkles size={14} /> AI News Curation</div>
           <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">오늘의 미주 콘텐츠를 준비하세요</h1>
-          <p className="text-slate-500">검증할 뉴스를 고르면 인스타그램과 블로그 원고를 한 번에 만듭니다.</p>
+          <p className="text-slate-500">{isAdmin ? "검증할 뉴스를 고르면 인스타그램·블로그·Threads 원고를 만듭니다." : "수집된 미국 시장 기사와 VORA의 해설을 확인하세요."}</p>
         </div>
 
         {/* Progress Indicator */}
@@ -125,12 +131,13 @@ export default function HomePage() {
 
         {/* Content */}
         {currentStep === "selection" && (
-          <SelectionStep
+          <><SelectionStep
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
             onSubmit={handleSubmitSelection}
             articles={[articles, setArticles]}
-          />
+            isAdmin={isAdmin}
+          />{isAdmin && <PublishingHistory />}</>
         )}
 
         {currentStep === "articles" && (
@@ -140,6 +147,7 @@ export default function HomePage() {
             onSaveArticle={handleSaveArticle}
             onUnsaveArticle={handleUnsaveArticle}
             onConfirm={handleConfirm}
+            isAdmin={isAdmin}
           />
         )}
 

@@ -4,6 +4,7 @@ import { Badge } from "@/ui/badge";
 import type { Article } from "@/app/api/article";
 
 interface ArticlesStepProps {
+  isAdmin: boolean;
   articles: Article[];
   savedArticles: Article[];
   onSaveArticle: (article: Article) => void;
@@ -12,6 +13,7 @@ interface ArticlesStepProps {
 }
 
 export function ArticlesStep({
+  isAdmin,
   articles,
   savedArticles,
   onSaveArticle,
@@ -28,11 +30,9 @@ export function ArticlesStep({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2>기사 선택</h2>
-            <p className="text-gray-600 text-sm">
-              콘텐츠에 사용할 기사를 선택하세요 · {savedArticles.length}/8개 선택
-            </p>
+            <p className="text-gray-600 text-sm">{isAdmin ? `콘텐츠에 사용할 기사를 선택하세요 · ${savedArticles.length}/8개 선택` : "기사와 시장 인사이트를 읽을 수 있습니다."}</p>
           </div>
-          <div className="flex gap-3">
+          {isAdmin && <div className="flex gap-3">
             <Button
               onClick={onConfirm}
               disabled={savedArticles.length === 0}
@@ -41,7 +41,7 @@ export function ArticlesStep({
               <Sparkles size={16} />
               콘텐츠 만들기 ({savedArticles.length})
             </Button>
-          </div>
+          </div>}
         </div>
       </div>
 
@@ -67,6 +67,7 @@ export function ArticlesStep({
                     <span className="text-xs text-gray-500">
                       {article.date}
                     </span>
+                    {article.linkStatus === "verified" && <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">원문 확인됨</span>}
                   </div>
 
                   <h3 className="mb-2 text-gray-900">{article.title}</h3>
@@ -100,7 +101,7 @@ export function ArticlesStep({
                   </a>
                 </div>
 
-                <Button
+                {isAdmin && <Button
                   onClick={() =>
                     saved
                       ? onUnsaveArticle(articleKey(article))
@@ -114,7 +115,7 @@ export function ArticlesStep({
                 >
                   <Bookmark size={16} fill={saved ? "currentColor" : "none"} />
                   {saved ? "담김" : "담기"}
-                </Button>
+                </Button>}
               </div>
             </div>
           );

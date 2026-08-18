@@ -8,6 +8,7 @@ import { getArticles, postArticle } from "@/app/api/article";
 import type { Article, GetArticleResponse } from "@/app/api/article";
 
 interface SelectionStepProps {
+  isAdmin: boolean;
   articles: [Article[], React.Dispatch<React.SetStateAction<Article[]>>];
   selectedDate: string;
   onDateChange: (date: string) => void;
@@ -16,6 +17,7 @@ interface SelectionStepProps {
 }
 
 export function SelectionStep({
+  isAdmin,
   articles,
   selectedDate,
   onDateChange,
@@ -102,24 +104,16 @@ export function SelectionStep({
             {mutation.isPending ? "불러오는 중..." : "기사 요청"}
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (!isValid || isBusy) return;
-              collectMutation.mutate();
-            }}
-            disabled={!isValid || isBusy}
-            className="w-full py-6"
-          >
-            {collectMutation.isPending
-              ? "새 기사를 수집하는 중..."
-              : "새 기사 수집 (OpenAI 사용)"}
-          </Button>
-
-          <p className="text-center text-xs text-gray-500">
-            새 기사 수집은 OpenAI API 사용료가 발생하며 완료까지 시간이 걸릴 수 있습니다.
-          </p>
+          {isAdmin ? (
+            <>
+              <Button type="button" variant="outline" onClick={() => { if (isValid && !isBusy) collectMutation.mutate(); }} disabled={!isValid || isBusy} className="w-full py-6">
+                {collectMutation.isPending ? "새 기사를 수집하는 중..." : "새 기사 수집 (OpenAI 사용)"}
+              </Button>
+              <p className="text-center text-xs text-gray-500">새 기사 수집은 관리자 전용이며 OpenAI API 사용료가 발생합니다.</p>
+            </>
+          ) : (
+            <p className="rounded-lg bg-slate-50 p-3 text-center text-xs text-slate-500">읽기 전용 계정입니다. 기존 기사 조회만 가능합니다.</p>
+          )}
         </div>
       </div>
     </div>

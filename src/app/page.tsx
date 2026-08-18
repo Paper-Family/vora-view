@@ -10,5 +10,13 @@ export default async function Home() {
     redirect("/login?reason=not_authenticated");
   }
 
-  return <HomePage />;
+  const backendUrl = process.env.VORA_API_URL ?? "https://vora-api-jayl.onrender.com";
+  const response = await fetch(`${backendUrl}/api/auth/me`, {
+    headers: { Cookie: `connect.sid=${session}` },
+    cache: "no-store",
+  });
+  if (!response.ok) redirect("/login?reason=not_authenticated");
+  const data = await response.json();
+
+  return <HomePage user={data.user} />;
 }
