@@ -38,7 +38,7 @@ function threadsText(content: GeneratedContent) {
   return [
     content.threads.headline,
     "",
-    ...content.threads.posts.flatMap((post, index) => [`${index + 1}/${content.threads.posts.length} ${post}`, ""]),
+    ...content.threads.posts.flatMap((post, index) => [`${index + 1}. ${post}`, ""]),
     content.threads.closing,
     "",
     content.threads.hashtags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)).join(" "),
@@ -582,7 +582,7 @@ export function SummaryStep({ savedArticles, onBack }: SummaryStepProps) {
               <Button onClick={() => handleCopy("threads")} className="bg-slate-950 text-white hover:bg-slate-800">{copiedTarget === "threads" ? <Check /> : <Copy />} {copiedTarget === "threads" ? "복사 완료" : "Threads 원고 복사"}</Button>
             </div>
             <div className="mt-6 space-y-4">
-              {content.threads.posts.map((post, index) => <div key={`${index}-${post}`} className="rounded-2xl border border-slate-200 p-5"><p className="mb-2 text-xs font-semibold text-blue-600">{index + 1}/{content.threads.posts.length}</p><p className="whitespace-pre-line leading-7 text-slate-700">{post}</p></div>)}
+              {content.threads.posts.map((post, index) => <div key={`${index}-${post}`} className="rounded-2xl border border-slate-200 p-5"><p className="mb-2 text-xs font-semibold text-blue-600">{index + 1}.</p><p className="whitespace-pre-line leading-7 text-slate-700">{post}</p></div>)}
             </div>
             <p className="mt-6 rounded-2xl bg-blue-50 p-5 leading-7 text-blue-950">{content.threads.closing}</p>
             <p className="mt-4 text-sm text-blue-600">{content.threads.hashtags.map((tag) => `#${tag.replace(/^#/, "")}`).join(" ")}</p>
