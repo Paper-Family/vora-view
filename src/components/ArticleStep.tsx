@@ -29,7 +29,7 @@ export function ArticlesStep({
           <div>
             <h2>기사 선택</h2>
             <p className="text-gray-600 text-sm">
-              콘텐츠에 사용할 기사를 선택하세요 · {savedArticles.length}개 선택
+              콘텐츠에 사용할 기사를 선택하세요 · {savedArticles.length}/8개 선택
             </p>
           </div>
           <div className="flex gap-3">
@@ -107,6 +107,7 @@ export function ArticlesStep({
                       : onSaveArticle(article)
                   }
                   variant={saved ? "default" : "outline"}
+                  disabled={!saved && savedArticles.length >= 8}
                   className={`flex-shrink-0 gap-2 ${
                     saved ? "bg-blue-600 hover:bg-blue-700 text-white" : ""
                   }`}

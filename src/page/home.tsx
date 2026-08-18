@@ -22,7 +22,7 @@ export default function HomePage() {
 
   const handleSaveArticle = (article: Article) => {
     setSavedArticles((prev) =>
-      prev.some((savedArticle) =>
+      prev.length >= 8 || prev.some((savedArticle) =>
         (savedArticle._id || savedArticle.link) === (article._id || article.link)
       )
         ? prev
