@@ -45,16 +45,9 @@ export function SelectionStep({
   });
 
   const collectMutation = useMutation({
-    mutationFn: async () => {
-      await postArticle();
-      return getArticles({
-        sort: "-date",
-        limit: 30,
-        date: selectedDate,
-      });
-    },
+    mutationFn: postArticle,
     onSuccess: (data) => {
-      onArticlesLoaded?.(data);
+      onArticlesLoaded?.({ articles: data.articles, left: 0 });
       setArticleList(data.articles);
       onSubmit?.();
     },
