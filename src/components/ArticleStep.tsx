@@ -32,6 +32,7 @@ export function ArticlesStep({
           <div>
             <h2>기사 선택</h2>
             <p className="text-gray-600 text-sm">{isAdmin ? `콘텐츠에 사용할 기사를 선택하세요 · ${savedArticles.length}개 선택` : "기사와 시장 인사이트를 읽을 수 있습니다."}</p>
+            <p className="mt-1 text-xs text-slate-400">원문·출처 정확도 45%와 미국 증시 중요도 55%를 반영한 순서입니다.</p>
           </div>
           {isAdmin && <div className="flex gap-3">
             <Button variant="outline" onClick={() => allSelected ? articles.forEach((article) => onUnsaveArticle(articleKey(article))) : articles.filter((article) => !isSaved(article)).forEach(onSaveArticle)}>{allSelected ? "전체 해제" : `전체 선택 (${articles.length})`}</Button>
@@ -48,7 +49,7 @@ export function ArticlesStep({
       </div>
 
       <div className="space-y-4">
-        {articles.map((article) => {
+        {articles.map((article, index) => {
           const saved = isSaved(article);
 
           return (
@@ -62,14 +63,22 @@ export function ArticlesStep({
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                      {index + 1}
+                    </span>
                     <Badge variant="secondary" className="text-xs">
                       {article.source}
                     </Badge>
+                    {article.sourceTier === "expanded" && <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">보완 출처</span>}
                     <span className="text-xs text-gray-500">
                       {article.date}
                     </span>
                     {article.linkStatus === "verified" && <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">원문 확인됨</span>}
+                    {article.linkStatus === "unverified" && <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">검증 필요</span>}
+                    {typeof article.accuracyScore === "number" && <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">정확도 {article.accuracyScore}</span>}
+                    {typeof article.marketImportanceScore === "number" && <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">증시 중요도 {article.marketImportanceScore}</span>}
+                    {typeof article.rankingScore === "number" && <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">종합 {article.rankingScore}</span>}
                   </div>
 
                   <h3 className="mb-2 text-gray-900">{article.title}</h3>

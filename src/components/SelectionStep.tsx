@@ -50,7 +50,7 @@ export function SelectionStep({
   });
 
   const collectMutation = useMutation({
-    mutationFn: () => postArticle(category),
+    mutationFn: () => postArticle(category, selectedDate),
     onSuccess: (data) => {
       onArticlesLoaded?.({ articles: data.articles, left: 0 });
       setArticleList(data.articles);
@@ -74,7 +74,7 @@ export function SelectionStep({
           <div>
             <h2>뉴스 큐레이션 요청</h2>
             <p className="text-gray-600 text-sm">
-              발행할 날짜의 수집 기사를 불러오세요
+              기사에 표시된 미국 현지 게시일을 선택하세요
             </p>
           </div>
 
@@ -103,7 +103,7 @@ export function SelectionStep({
               if (!isValid || isBusy) return;
 
               mutation.mutate({
-                sort: "-date",
+                sort: "-rankingScore",
                 limit: 30,
                 date: selectedDate,
                 category,

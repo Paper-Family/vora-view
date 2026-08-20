@@ -8,8 +8,12 @@ export type Article = {
   link: string;
   linkStatus?: "verified" | "unverified" | "dead";
   linkVerifiedAt?: string;
+  accuracyScore?: number;
+  marketImportanceScore?: number;
+  rankingScore?: number;
   sectors: string[];
   source: string;
+  sourceTier?: "primary" | "expanded";
   summary: string;
   title: string;
 };
@@ -63,11 +67,11 @@ export async function getArticles(params?: GetArticleParams) {
   return res.json();
 }
 
-export async function postArticle(category: ArticleCategory) {
+export async function postArticle(category: ArticleCategory, date: string) {
   const res = await fetch("/api/article", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ category }),
+    body: JSON.stringify({ category, date }),
     credentials: "include",
     cache: "no-store",
   });
