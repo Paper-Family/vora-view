@@ -26,7 +26,13 @@ export function SelectionStep({
   onSubmit,
 }: SelectionStepProps) {
   // console.log("=", selectedDate);
-  const isValid = selectedDate;
+  const latestUsDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const isValid = Boolean(selectedDate && selectedDate <= latestUsDate);
   const [, setArticleList] = articles;
   const [category, setCategory] = useState<ArticleCategory>("all");
   const mutation = useMutation({
@@ -93,9 +99,13 @@ export function SelectionStep({
               id="date"
               type="date"
               value={selectedDate}
+              max={latestUsDate}
               onChange={(e) => onDateChange(e.target.value)}
               className="w-full mt-2 px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <p className="mt-2 text-xs text-slate-500">
+              미국 동부 기준 현재 수집 가능한 최신 날짜는 {latestUsDate}입니다.
+            </p>
           </div>
 
           <Button

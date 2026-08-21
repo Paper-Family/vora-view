@@ -19,7 +19,14 @@ interface HomePageProps {
 export default function HomePage({ user }: HomePageProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>("selection");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(() =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date())
+  );
   const [articles, setArticles] = useState<Article[]>([]);
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
   const isAdmin = user.role === "admin";
